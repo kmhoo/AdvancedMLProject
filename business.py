@@ -38,7 +38,7 @@ chk = OpenFile(chk_data)
 # sum the total number of check-ins
 chk['sum_checkins'] = 0
 for b, row in enumerate(chk['checkin_info']):
-    chk['sum_checkins'][b] = sum(row.values())
+    chk.loc[b, 'sum_checkins'] = sum(row.values())
 
 # only need business_id and total check-ins
 chk = chk[['business_id', 'sum_checkins']]
