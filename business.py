@@ -17,8 +17,11 @@ def RenameCols(df, letter):
     for col in df.columns:
         if col in ['business_id', 'user_id']:
             continue
+        elif col in ['type', 'neighborhoods']:
+            df.drop(col, axis=1, inplace=True)
         else:
             df.rename(columns={col: letter+'_'+col}, inplace=True)
+
     return df
 
 # set the location of the data sets
