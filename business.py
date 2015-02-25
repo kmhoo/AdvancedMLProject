@@ -48,12 +48,12 @@ chk = chk[['business_id', 'b_sum_checkins']]
 # extract cool/funny/useful votes for users
 usr_votes = pd.DataFrame(list(usr['u_votes']), columns=['cool', 'funny', 'useful'])
 usr_votes = RenameCols(usr_votes, "u_votes")
-usr = pd.concat([usr, usr_votes])
+usr = pd.concat([usr, usr_votes], axis=1)
 
 # extract cool/funny/useful votes for reviews
 rev_votes = pd.DataFrame(list(rev['r_votes']), columns=['cool', 'funny', 'useful'])
 rev_votes = RenameCols(rev_votes, "r_votes")
-rev = pd.concat([rev, rev_votes])
+rev = pd.concat([rev, rev_votes], axis=1)
 
 ## Omitting the following because of memory issues
 # Extract list of business categories - 508 total
