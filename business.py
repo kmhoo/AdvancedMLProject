@@ -37,7 +37,7 @@ def CityFix(df):
         elif city == 'Pheonix':
             df.loc[l, 'city'] = 'Phoenix'
         elif city == 'Scottsdale ':
-            df.loc[l, city] = city.strip()
+            df.loc[l, 'city'] = 'Scottsdale'
     return df
 
 
