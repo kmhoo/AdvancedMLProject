@@ -57,14 +57,14 @@ rev = pd.concat([rev, rev_votes], axis=1)
 
 ## Omitting the following because of memory issues
 # Extract list of business categories - 508 total
-# bus_categories = [item for sublist in list(bus['b_categories']) for item in sublist]
-# bus_categories = sorted(list(set(bus_categories)))
-# bus_categories = ['b_categories_'+re.sub(u'[ &/-]', u'', cat) for cat in bus_categories]
+bus_categories = [item for sublist in list(bus['b_categories']) for item in sublist]
+bus_categories = sorted(list(set(bus_categories)))
+bus_categories = ['b_categories_'+re.sub(u'[ &/-]', u'', cat) for cat in bus_categories]
 
 # Create dummy variable for each category
 # Note: must remove one dummy to avoid multicollinearity
-# for cat in bus_categories:
-#     bus[cat] = [1 if cat in row else 0 for row in bus['b_categories']]
+for cat in bus_categories:
+    bus[cat] = [1 if cat in row else 0 for row in bus['b_categories']]
 
 # merge all of the datasets together on user and business ids
 full = pd.merge(rev, usr, on='user_id', how='left')
