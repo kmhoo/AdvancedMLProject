@@ -18,12 +18,28 @@ def RenameCols(df, letter):
     for col in df.columns:
         if col in ['business_id', 'user_id']:
             continue
-        elif col in ['type', 'neighborhoods']:
+        elif col in ['type', 'neighborhoods', 'state']:
             df.drop(col, axis=1, inplace=True)
         else:
             df.rename(columns={col: letter+'_'+col}, inplace=True)
 
     return df
+
+# fix all cities that are mispelled
+def CityFix(df):
+    for l, city in enumerate(df['city']):
+        if city == 'Fountain Hls':
+            df.loc[l, 'city'] = 'Fountain Hills'
+        elif city == 'Glendale Az':
+            df.loc[l, 'city'] = 'Glendale'
+        elif city == 'Good Year':
+            df.loc[l, 'city'] = 'Goodyear'
+        elif city == 'Pheonix':
+            df.loc[l, 'city'] = 'Phoenix'
+        elif city == 'Scottsdale ':
+            df.loc[l, 'city'] = 'Scottsdale'
+    return df
+
 
 # set the location of the data sets
 bus_data = "yelp_training_set/yelp_training_set_business.json"
@@ -32,7 +48,7 @@ usr_data = "yelp_training_set/yelp_training_set_user.json"
 chk_data = "yelp_training_set/yelp_training_set_checkin.json"
 
 # open and rename all of the data sets
-bus = RenameCols(OpenFile(bus_data), 'b')
+bus = RenameCols(CityFix(OpenFile(bus_data)), 'b')
 rev = RenameCols(OpenFile(rev_data), 'r')
 usr = RenameCols(OpenFile(usr_data), 'u')
 chk = OpenFile(chk_data)
@@ -55,16 +71,15 @@ rev_votes = pd.DataFrame(list(rev['r_votes']), columns=['cool', 'funny', 'useful
 rev_votes = RenameCols(rev_votes, "r_votes")
 rev = pd.concat([rev, rev_votes], axis=1)
 
-## Omitting the following because of memory issues
 # Extract list of business categories - 508 total
 bus_categories = [item for sublist in list(bus['b_categories']) for item in sublist]
 bus_categories = sorted(list(set(bus_categories)))
-bus_categories = ['b_categories_'+re.sub(u'[ &/-]', u'', cat) for cat in bus_categories]
+bus_categories = [re.sub(u'[ &/-]', u'', cat) for cat in bus_categories]
 
 # Create dummy variable for each category
 # Note: must remove one dummy to avoid multicollinearity
 for cat in bus_categories:
-    bus[cat] = [1 if cat in row else 0 for row in bus['b_categories']]
+    bus['b_categories_'+cat] = [1 if cat in row else 0 for row in bus['b_categories']]
 
 # merge all of the datasets together on user and business ids
 full = pd.merge(rev, usr, on='user_id', how='left')
