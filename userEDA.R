@@ -128,3 +128,12 @@ p6 = incAxisLabelSpace(p6)
 ggsave(p6, filename="userCountsBar.png", width=5, height=5, units="in")
 
 
+# Pairs Plot: user vote types
+userVotes = users[,6:8]
+names(userVotes) = c("cool", "funny", "useful")
+userVotes = userVotes/1000
+p7 = ggpairs(userVotes, params=list(labelSize=7), 
+             title="Number of Votes (thousands) for Users' Reviews by Category")
+png("userVotesPairs.png", height=5, width=7, units="in", res=300)
+p7
+dev.off()
