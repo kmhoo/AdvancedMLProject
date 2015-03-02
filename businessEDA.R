@@ -85,6 +85,8 @@ buscategories <- uniqueBusiness[,-c(2,4,5,6,7,8,519)]
 justcategories <- buscategories[,-c(1,2,3,4)]
 catSum <- colSums(justcategories)
 catSumMelt <- melt(catSum)
+catSumMelt$category = row.names(catSumMelt)
+row.names(catSumMelt) = NULL
 
 # plot the density of businesses per category
 b8 <- ggplot(catSumMelt, aes(x=value))
@@ -95,7 +97,7 @@ b8
 
 # plot each category and the number of businesses
 catSumMelt2 <- catSumMelt[order(-catSumMelt$value),]
-names(catSumMelt2) <- c('category', 'num_of_businesses')
+names(catSumMelt2) <- c('num_of_businesses', 'category')
 b9 <- ggplot(catSumMelt2, aes(y=num_of_businesses, x=category)) 
 b9 <- b9 + geom_bar(stat="identity", fill='purple4')
 b9 <- b9 + ggtitle("Number Businesses per Category")
