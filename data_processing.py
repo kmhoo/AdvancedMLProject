@@ -7,16 +7,15 @@ import re
 # function to exclude all columns unnecessary/unusable or possible data leakage
 # as well as update to make sure all columns are dummy variables
 def updateColumns(df):
-    for col in df.columns:
 
+    for col in df.columns:
         # create dummy variables for all of the cities excluding last to avoid multicollinearity
         if col == u'b_city':
-            cities = sorted(list(set(df['b_city'])))
-            cities = cities[:-1]
-            for city in cities:
-                df[city] = [1 if city in row else 0 for row in df['b_city']]
-                city2 = re.sub(u' ', u'', city)
-                df.rename(columns={city: 'b_city_'+city2}, inplace=True)
+            df[col] = [re.sub(u' ', u'', city) for city in df[col]]
+            cities_df = pd.get_dummies(df[col], prefix='b_city')
+            cities_df.drop('b_city_Ahwatukee', axis=1, inplace=True)
+            df = pd.concat([df, cities_df], axis=1)
+            df.drop(col, axis=1, inplace=True)
 
         # change review stars to target column
         elif col == u'r_stars':
@@ -37,6 +36,8 @@ def updateColumns(df):
             df.drop(col, axis=1, inplace=True)
 
     return df
+
+
 
 # function to read in file name, update columns, and return two numpy arrays
 # one of the arrays is the features and the other is the target variable
