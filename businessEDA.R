@@ -1,4 +1,4 @@
-setwd('/Users/kaileyhoo/Documents/MSAN/Module 3/MSAN630/Project/AdvancedMLProject/')
+#setwd('/Users/kaileyhoo/Documents/MSAN/Module 3/MSAN630/Project/AdvancedMLProject/')
 library(ggplot2)
 library(reshape2)
 
@@ -221,3 +221,21 @@ b16 <- b16 + xlab("Star Ratings") + ylab("Number of Businesses")
 b16 <- incAxisLabelSpace(b16)
 b16
 ggsave(b16, filename="closeBusinessStarRatings.png", width=7, height=5, units="in")
+
+# Business star rating (b_stars) across all reviews 
+# vs. avg star rating in dataset
+busAvgStars = aggregate(r_stars ~ business_id, data=training, mean, na.rm=TRUE)
+names(busAvgStars)[names(busAvgStars)=="r_stars"] = "r_stars_avg"
+busAvgStars = merge(busAvgStars, training[,c('business_id', 'b_stars')], all=FALSE)
+
+b17 = ggplot(busAvgStars, aes(x=b_stars, y=r_stars_avg))
+b17 = b17 + geom_point()
+corr = cor(busAvgStars$b_stars, busAvgStars$r_stars_avg)
+b17 = b17 + geom_text(x=1.5, y=4.5, size=3,
+                    label=paste("Correlation:", signif(corr, 4)))
+b17 = b17 + ggtitle("Business Average Stars
+                  All Reviews vs. Reviews in Data Set")
+b17 = b17 + xlab("Average Stars Across All Reviews")
+b17 = b17 + ylab("Average Stars for Reviews in Data Set")
+b17 = incAxisLabelSpace(b17)
+ggsave(b17, filename="busAvgStarsScatter.png", width=5, height=5, units="in")
