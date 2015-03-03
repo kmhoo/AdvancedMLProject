@@ -196,28 +196,28 @@ b14 <- b14 + xlab("Open = True, Closed = False") + ylab("Number of Businesses")
 b14 <- b14 + theme(axis.text.x=element_text(angle = 45, hjust=1))
 b14 <- incAxisLabelSpace(b14)
 b14
-ggsave(b14, filename="openBusinesses.png", width=3, height=5, units="in")
+ggsave(b14, filename="openBusinesses.png", width=5, height=5, units="in")
 
 # subset data for open or closed businesses for separate analysis
 openBusiness <- business[business$b_open=="True",]
 closeBusiness <- business[business$b_open=="False",]
 
 # open business star ratings
-b14 <- ggplot(openBusiness, aes(x=b_stars))
-b14 <- b14 + geom_histogram(colour = "white", fill='purple4', binwidth = 0.5)
-b14 <- b14 + xlim(1,5.5)
-b14 <- b14 + ggtitle("Number Businesses per Star Rating")
-b14 <- b14 + xlab("Star Ratings") + ylab("Number of Businesses")
-b14 <- incAxisLabelSpace(b14)
-b14
-ggsave(b14, filename="openBusinessStarRatings.png", width=7, height=5, units="in")
-
-# close business star ratings
-b15 <- ggplot(closeBusiness, aes(x=b_stars))
+b15 <- ggplot(openBusiness, aes(x=b_stars))
 b15 <- b15 + geom_histogram(colour = "white", fill='purple4', binwidth = 0.5)
 b15 <- b15 + xlim(1,5.5)
 b15 <- b15 + ggtitle("Number Businesses per Star Rating")
 b15 <- b15 + xlab("Star Ratings") + ylab("Number of Businesses")
 b15 <- incAxisLabelSpace(b15)
 b15
-ggsave(b15, filename="closeBusinessStarRatings.png", width=7, height=5, units="in")
+ggsave(b15, filename="openBusinessStarRatings.png", width=7, height=5, units="in")
+
+# close business star ratings
+b16 <- ggplot(closeBusiness, aes(x=b_stars))
+b16 <- b16 + geom_histogram(colour = "white", fill='purple4', binwidth = 0.5)
+b16 <- b16 + xlim(1,5.5)
+b16 <- b16 + ggtitle("Number Businesses per Star Rating")
+b16 <- b16 + xlab("Star Ratings") + ylab("Number of Businesses")
+b16 <- incAxisLabelSpace(b16)
+b16
+ggsave(b16, filename="closeBusinessStarRatings.png", width=7, height=5, units="in")
