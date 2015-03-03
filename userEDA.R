@@ -137,3 +137,26 @@ p7 = ggpairs(userVotes, params=list(labelSize=7),
 png("userVotesPairs.png", height=5, width=7, units="in", res=300)
 p7
 dev.off()
+
+
+# Correlation between user average stars overall and
+# average stars in dataset
+userAvgStars = aggregate(r_stars ~ user_id, data=training, mean, na.rm=TRUE)
+names(userAvgStars)[names(userAvgStars)=="r_stars"] = "r_stars_avg"
+userAvgStars = merge(userAvgStars, users[,c('user_id', 'u_average_stars')], all=FALSE)
+userAvgStars = subset(userAvgStars, !is.na(u_average_stars))
+
+p8 = ggplot(userAvgStars, aes(x=u_average_stars, y=r_stars_avg))
+p8 = p8 + geom_point()
+corr = cor(userAvgStars$u_average_stars, userAvgStars$r_stars_avg)
+p8 = p8 + geom_text(x=0.75, y=4.5, size=3,
+                    label=paste("Correlation:", signif(corr, 4)))
+p8 = p8 + ggtitle("User Average Stars
+                  All Reviews vs. Reviews in Data Set")
+p8 = p8 + xlab("Average Stars Across All Reviews")
+p8 = p8 + ylab("Average Stars for Reviews in Data Set")
+p8 = incAxisLabelSpace(p8)
+ggsave(p8, filename="userAvgStarsScatter.png", width=5, height=5, units="in")
+
+# Worth fixing???
+bitterPrick = subset(userAvgStars, u_average_stars==0)
