@@ -3,7 +3,6 @@ __author__ = 'kaileyhoo'
 import pandas as pd
 import numpy as np
 import re
-import time
 
 # function to exclude all columns unnecessary/unusable or possible data leakage
 # as well as update to make sure all columns are dummy variables
@@ -28,11 +27,11 @@ def updateColumns(df):
 
         # change date to integer
         elif col == u'r_date':
-            df[col] = time.time(time.strptime(df[col], '%Y-%b-%d'))
+            df[col] = pd.to_datetime(df[col])
 
         # list of columns we want to keep in our dataset as features
-        elif col in ['b_latitude', 'b_longitude', 'b_review_count', 'b_open', 'b_stars', 'user_id'
-                     'u_votes_cool', 'u_votes_funny', 'u_votes_useful', 'u_review_count', 'u_stars', 'business_id'] \
+        elif col in ['b_latitude', 'b_longitude', 'b_review_count', 'b_open', 'b_stars',
+                     'u_votes_cool', 'u_votes_funny', 'u_votes_useful', 'u_review_count', 'u_stars'] \
                 or 'b_categories_' in col:
             continue
 
