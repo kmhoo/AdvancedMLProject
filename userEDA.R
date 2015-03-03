@@ -43,7 +43,7 @@ userVotesMelt$vote_type = as.factor(gsub("u_votes_", "",
 
 # Boxplots of user votes by vote type/category
 p1 = ggplot(userVotesMelt, aes(y=num, x=vote_type))
-p1 = p1 + geom_boxplot(varwidth=TRUE, fill='lightblue') 
+p1 = p1 + geom_boxplot(varwidth=TRUE, fill='DeepSkyBlue') 
 p1 = p1 + ggtitle("Boxplots of Number of User Votes by Vote Type")
 p1 = p1 + xlab("Vote Type") + ylab("Number of Votes Across Reviews per User")
 p1 = p1 + coord_flip()
@@ -60,7 +60,7 @@ ggsave(p1, filename="userVotesBoxplotsLim.png", height=6, width=6, units="in")
 
 # Barchart of number of total votes for each vote category
 p2 = ggplot(userVotesMelt, aes(y=num, x=vote_type)) 
-p2 = p2 + geom_bar(stat="identity", fill='red')
+p2 = p2 + geom_bar(stat="identity", fill='DeepSkyBlue')
 p2 = p2 + ggtitle("Total User Votes for Each Vote Type")
 p2 = p2 + xlab("Vote Type") + ylab("Number of Votes")
 p2 = incAxisLabelSpace(p2)
@@ -106,7 +106,7 @@ revTotals = data.frame(cbind(c("Reviews in Dataset", "Reviews by Users"),
 names(revTotals) = c("rev_source", "num")
 revTotals$num = as.numeric(as.character(revTotals$num))
 p5 = ggplot(revTotals, aes(x=rev_source, y=num)) 
-p5 = p5 + geom_bar(stat='identity', fill="red")
+p5 = p5 + geom_bar(stat='identity', fill="DeepSkyBlue")
 p5 = p5 + geom_text(aes(label=revTotals$num), vjust=-0.3, size=3)
 p5 = p5 + ggtitle("Reviews in Data Set vs. All Reviews by Users")
 p5 = p5 + xlab("Review Source") + ylab("Number of Reviews")
@@ -120,7 +120,7 @@ usrTotals = data.frame(cbind(c("Users in Review Data", "Users in User Data"),
 names(usrTotals) = c("usr_source", "num")
 usrTotals$num = as.numeric(as.character(usrTotals$num))
 p6 = ggplot(usrTotals, aes(x=usr_source, y=num)) 
-p6 = p6 + geom_bar(stat='identity', fill="red")
+p6 = p6 + geom_bar(stat='identity', fill="DeepSkyBlue")
 p6 = p6 + geom_text(aes(label=usrTotals$num), vjust=-0.3, size=3)
 p6 = p6 + ggtitle("Users in Review Data vs. Users in User Data")
 p6 = p6 + xlab("User Source") + ylab("Number of Reviews")
