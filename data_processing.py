@@ -27,8 +27,8 @@ def updateColumns(df):
             df.drop(col, axis=1, inplace=True)
 
         # list of columns we want to keep in our dataset as features
-        elif col in ['b_categories', 'b_latitude', 'b_longitude', 'b_review_count', 'b_open', 'r_date',
-                     'u_votes_cool', 'u_votes_funny', 'u_votes_useful', 'u_review_count', 'business_id',
+        elif col in ['b_categories', 'b_latitude', 'b_longitude', 'b_review_count', 'b_open', 'b_stars', 'r_date',
+                     'u_votes_cool', 'u_votes_funny', 'u_votes_useful', 'u_review_count', 'u_stars', 'business_id',
                      'user_id'] or 'b_categories_' in col:
             continue
 
