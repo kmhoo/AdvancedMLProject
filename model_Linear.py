@@ -5,7 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from data_processing import numpyArrays
 from sklearn.cross_validation import KFold
-from sklearn.metrics import mean_absolute_error
+from sklearn.preprocessing import scale
+from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import SGDRegressor
 from sklearn.linear_model import LinearRegression
 
@@ -13,6 +14,11 @@ from sklearn.linear_model import LinearRegression
 # Import the data
 training = pd.read_csv("training_init.csv")
 X, y = numpyArrays(training)
+#X_scale = scale(X)
+
+# Correlation Matrix
+
+print np.corrcoef(X[:, :12], rowvar=0)
 
 # Set parameters
 model = LinearRegression()
@@ -22,14 +28,18 @@ n = len(y)
 scores = []
 kf = KFold(n, n_folds=5, shuffle=True)
 
-# Calculate mean absolute deviation for train/test for each fold
+# Calculate root mean squared error for train/test for each fold
 for train_idx, test_idx in kf:
     X_train, X_test = X[train_idx], X[test_idx]
     y_train, y_test = y[train_idx], y[test_idx]
     model.fit(X_train, y_train)
     prediction = model.predict(X_test)
-    mad = mean_absolute_error(y_test, prediction)
-    scores.append(mad)
+    print y_test
+    print prediction
+    rmse = np.sqrt(mean_squared_error(y_test, prediction))
+    scores.append(rmse)
 
+print "Linear Model 5-Fold CV"
 print scores
 print np.mean(scores)
+
