@@ -25,12 +25,16 @@ def updateColumns(df):
         elif col == u'b_categories_Accessories':
             df.drop(col, axis=1, inplace=True)
 
-        # change date to integer
+        # change date to epoch time
         elif col == u'r_date':
-            df[col] = pd.to_datetime(df[col])
+            df[col] = pd.to_datetime(df[col]).astype(np.int64) // 10**9
+
+        # Change open/closed status from boolean to 1/0
+        elif col == u'b_open':
+            df[col] = df[col].astype(int)
 
         # list of columns we want to keep in our dataset as features
-        elif col in ['b_latitude', 'b_longitude', 'b_review_count', 'b_open', 'b_stars',
+        elif col in ['b_latitude', 'b_longitude', 'b_review_count', 'b_stars',
                      'u_votes_cool', 'u_votes_funny', 'u_votes_useful', 'u_review_count', 'u_stars'] \
                 or 'b_categories_' in col:
             continue
@@ -42,24 +46,32 @@ def updateColumns(df):
     return df
 
 
-
-# function to read in file name, update columns, and return two numpy arrays
+# function to return two numpy arrays
 # one of the arrays is the features and the other is the target variable
-def numpyArrays(file):
-    training = pd.read_csv(file)
-
-    # exclude all columns that are unusable
-    training_update = updateColumns(training)
+def numpyArrays(df):
 
     # create our target variable, and our feature variables
     target = 'target'
-    features = [col for col in training_update.columns if col not in target]
+    features = [col for col in df.columns if col not in target]
 
     # set features to X and target to y numpy arrays
-    X, y = np.array(training_update.ix[:, features]), np.array(training_update.ix[:, target])
+    X, y = np.array(df.ix[:, features]), np.array(df.ix[:, target])
 
     # shuffle the indices
     indices = np.arange(y.shape[0])
     np.random.shuffle(indices)
     X, y = X[indices], y[indices]
     return X, y
+
+
+# Function to impute missing values with the column mean
+def roughImpute(df):
+    df = df.fillna(df.mean())
+    return df
+
+
+if __name__=='__main__':
+    training = pd.read_csv("yelp_training.csv")
+    training = updateColumns(training)
+    training = roughImpute(training)
+    training.to_csv('training_init.csv', index=False, encoding='utf-8')
