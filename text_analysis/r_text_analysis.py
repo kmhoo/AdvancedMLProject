@@ -25,12 +25,19 @@ def get_reviews(fname):
     :param fname: file name of data set; expecting csv
     :return: pandas dataframe of text reviews (strings)
     """
+    stopwords = nltk.corpus.stopwords.words('english')
+    stopwords.extend(string.punctuation)
+
     try:
         with open(fname, "rb") as infile:
-            df = pd.DataFrame.from_csv(infile, header=0)
+            df = pd.DataFrame.from_csv(infile, header=0, index_col=False)
 
             # drop any review entries that are blank
             df = df.dropna()
+            # clean up text to remove punctuation and empty reviews
+            reviewsList[:] = [s.replace('\n', '').lower() for s in df]
+
+
         return df
     except:
         raise IOError
@@ -91,6 +98,8 @@ def get_ngrams(tokens):
     :return: outputs unigram, bigram, and trigram files
     """
 
+    print tokens
+
     print "processing N-grams"
     # collect the bigrams and trigrams
     bigrams = nltk.bigrams(tokens)
@@ -106,25 +115,25 @@ def get_ngrams(tokens):
 
     # write out n-gram lists to file
     path1 = 'review_unigrams.csv'
-    writer = csv.writer(open(path1, 'wb'))
-    for term, val in unigrams.most_common():
+    # writer = csv.writer(open(path1, 'wb'))
+    # for term, val in unigrams.most_common():
         # print term, val
-        writer.writerow([term, val])
+        # writer.writerow([term, val])
     print "Unigrams done: ", str(path1)
 
     path2 = 'review_bigrams.csv'
-    writer2 = csv.writer(open(path2, 'wb'))
-    for term, val in bigramFdist.items():
+    # writer2 = csv.writer(open(path2, 'wb'))
+    # for term, val in bigramFdist.items():
         # print term, val
-        writer2.writerow([term, val])
+        # writer2.writerow([term, val])
     print "Bigrams done: ", str(path2)
 
 
     path3 = 'review_trigrams.csv'
-    writer3 = csv.writer(open(path3, 'wb'))
-    for term, val in trigramFdist.items():
+    # writer3 = csv.writer(open(path3, 'wb'))
+    # for term, val in trigramFdist.items():
         # print term, val
-        writer3.writerow([term, val])
+        # writer3.writerow([term, val])
     print "Trigrams done: ", str(path3)
 
 
@@ -134,7 +143,6 @@ if __name__=="__main__":
     # pull user review text from data
     x = get_reviews("yelp_review_text.csv")
     reviews = []
-    bigramCounts = Counter()
 
     # convert to list of strings; output is a list of sentences
     reviewsList = list(x.values.flatten())
