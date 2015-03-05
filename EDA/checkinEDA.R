@@ -11,11 +11,7 @@ incAxisLabelSpace = function(plot){
 }
 
 ## Import data
-
-#setwd("/Users/griffin/Google Drive/USF/Spring1/AdvancedMachineLearning/AdvancedMLProject")
 #training = read.csv("yelp_training.csv")
-
-#setwd("/Users/griffin/Google Drive/USF/Spring1/AdvancedMachineLearning/AdvancedMLProject/Plots")
 
 # Number of checkins per business
 checkins = subset(training, select=c(business_id, b_sum_checkins))
@@ -29,7 +25,7 @@ c1 = c1 + geom_histogram(fill="LimeGreen")
 c1 = c1 + ggtitle("Number of Checkins Per Business")
 c1 = c1 + xlab("Number of Checkins") + ylab("Frequency")
 c1
-ggsave(c1, filename="checkinsHistogram.png", width=5, height=5, units="in")
+ggsave(c1, filename="Plots/checkinsHistogram.png", width=5, height=5, units="in")
 
 # proportion of businesses with less than 1000 checkins
 sum(checkins$b_sum_checkins<1000, na.rm=TRUE)/nrow(checkins)
@@ -41,7 +37,7 @@ c2 = c2 + ggtitle("Number of Checkins Per Business
                   (Less than 1000)")
 c2 = c2 + xlab("Number of Checkins") + ylab("Frequency")
 c2
-ggsave(c2, filename="checkinsHistogramLim.png", width=5, height=5, units="in")
+ggsave(c2, filename="Plots/checkinsHistogramLim.png", width=5, height=5, units="in")
 
 
 # Barchart: how many business has any checkins
@@ -52,7 +48,7 @@ c3 = c3 + ggtitle("Businesses With and Without Checkins")
 c3 = c3 + xlab("Business Has Checkins") + ylab("Frequency")
 c3 = incAxisLabelSpace(c3)
 c3
-ggsave(c3, filename="checkinsBarchart.png", width=5, height=5, units="in")
+ggsave(c3, filename="Plots/checkinsBarchart.png", width=5, height=5, units="in")
 
 
 # Plot of number of reviews against number of checkins (in data set)
@@ -68,5 +64,5 @@ c4 = c4 + xlab("Number of Check-Ins") + ylab("Number of Reviews")
 corr = cor(checkins$b_sum_checkins, checkins$num_reviews)
 c4 = c4 + geom_text(x=11000, y=800, size=3,
                     label=paste("Correlation:", signif(corr, 4)))
-ggsave(c4, filename="checkinsVsReviewsScatter.png", 
+ggsave(c4, filename="Plots/checkinsVsReviewsScatter.png", 
        width=5, height=5, units="in")

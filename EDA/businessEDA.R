@@ -1,4 +1,3 @@
-#setwd('/Users/kaileyhoo/Documents/MSAN/Module 3/MSAN630/Project/AdvancedMLProject/')
 library(ggplot2)
 library(reshape2)
 
@@ -28,7 +27,7 @@ b1 <- b1 + ggtitle("Number of Reviews Per Business")
 b1 <- b1 + xlab("Number of Reviews") + ylab("Density")
 b1 <- incAxisLabelSpace(b1)
 b1
-ggsave(b1, filename="businessTrainReviewCount.png", width=7, height=5, units="in")
+ggsave(b1, filename="Plots/businessTrainReviewCount.png", width=7, height=5, units="in")
 
 # calculate median and mean
 medRev <- median(reviewsPerBus$num_of_reviews)
@@ -42,7 +41,7 @@ b2 <- b2 + ggtitle("Number of Reviews Per Business with Less Than 50 Reviews")
 b2 <- b2 + xlab("Number of Reviews") + ylab("Density")
 b2 <- incAxisLabelSpace(b2)
 b2
-ggsave(b2, filename="businessTrainReviewCountLess50.png", width=7, height=5, units="in")
+ggsave(b2, filename="Plots/businessTrainReviewCountLess50.png", width=7, height=5, units="in")
 
 # subset to get one line per business
 uniqueBusiness <- business[!duplicated(business$business_id),]
@@ -55,7 +54,7 @@ b3 <- b3 + ggtitle("Number Reviews per Business")
 b3 <- b3 + xlab("Number of Reviews") + ylab("Number of Businesses")
 b3 <- incAxisLabelSpace(b3)
 b3
-ggsave(b3, filename="businessReviewCount.png", width=7, height=5, units="in")
+ggsave(b3, filename="Plots/businessReviewCount.png", width=7, height=5, units="in")
 
 # number of stars by business
 b4 <- ggplot(uniqueBusiness, aes(x=b_stars))
@@ -65,7 +64,7 @@ b4 <- b4 + ggtitle("Number Businesses per Star Rating")
 b4 <- b4 + xlab("Star Ratings") + ylab("Number of Businesses")
 b4 <- incAxisLabelSpace(b4)
 b4
-ggsave(b4, filename="businessStarRatings.png", width=7, height=5, units="in")
+ggsave(b4, filename="Plots/businessStarRatings.png", width=7, height=5, units="in")
 
 # density plot of stars
 b5 <- ggplot(uniqueBusiness, aes(x=b_stars))
@@ -74,7 +73,7 @@ b5 <- b5 + ggtitle("Number Businesses per Star Rating")
 b5 <- b5 + xlab("Star Ratings") + ylab("Density")
 b5 <- incAxisLabelSpace(b5)
 b5
-ggsave(b5, filename="businessStarRatingsDensity.png", width=7, height=5, units="in")
+ggsave(b5, filename="Plots/businessStarRatingsDensity.png", width=7, height=5, units="in")
 
 # number of businesses in each city
 busPerCity <- aggregate(. ~ b_city, uniqueBusiness[,c(1,3)], FUN=length)
@@ -87,7 +86,7 @@ b6 <- b6 + xlab("Cities") + ylab("Number of Businesses")
 b6 <- b6 + theme(axis.text.x=element_text(angle = 45, hjust=1))
 b6 <- incAxisLabelSpace(b6)
 b6
-ggsave(b6, filename="businessCities.png", width=7, height=5, units="in")
+ggsave(b6, filename="Plots/businessCities.png", width=7, height=5, units="in")
 
 # calculate the mean and median
 medCity <- median(busPerCity$num_of_businesses)
@@ -102,7 +101,7 @@ b7 <- b7 + xlab("Cities") + ylab("Number of Businesses")
 b7 <- b7 + theme(axis.text.x=element_text(angle = 45, hjust=1))
 b7 <- incAxisLabelSpace(b7)
 b7
-ggsave(b7, filename="businessCitiesTop15.png", width=7, height=5, units="in")
+ggsave(b7, filename="Plots/businessCitiesTop15.png", width=7, height=5, units="in")
 
 # subset to just category columns
 buscategories <- uniqueBusiness[,-c(2,4,5,6,7,8,519)]
@@ -124,7 +123,7 @@ b8 <- b8 + ggtitle("Number Businesses for Each Category")
 b8 <- b8 + xlab("Number of Businesses") + ylab("Density")
 b8 <- incAxisLabelSpace(b8)
 b8
-ggsave(b8, filename="businessCatDensity.png", width=7, height=5, units="in")
+ggsave(b8, filename="Plots/businessCatDensity.png", width=7, height=5, units="in")
 
 # plot each category and the number of businesses
 b9 <- ggplot(catSumMelt, aes(y=num_of_businesses, x=category)) 
@@ -134,7 +133,7 @@ b9 <- b9 + xlab("Categories") + ylab("Number of Businesses")
 b9 <- b9 + theme(axis.text.x=element_text(angle = 45, hjust=1))
 b9 <- incAxisLabelSpace(b9)
 b9
-ggsave(b9, filename="businessCat.png", width=15, height=5, units="in")
+ggsave(b9, filename="Plots/businessCat.png", width=15, height=5, units="in")
 
 # mean and median on businesses per category
 meanCat <- mean(catSumMelt$value)
@@ -149,7 +148,7 @@ b10 <- b10 + xlab("Categories") + ylab("Number of Businesses")
 b10 <- b10 + theme(axis.text.x=element_text(angle = 45, hjust=1))
 b10 <- incAxisLabelSpace(b10)
 b10
-ggsave(b10, filename="businessCatTop50.png", width=7, height=5, units="in")
+ggsave(b10, filename="Plots/businessCatTop50.png", width=7, height=5, units="in")
 
 # top 10 categories with the most businesses
 catSum10 <- catSumMelt[1:10,]
@@ -160,7 +159,7 @@ b11 <- b11 + xlab("Categories") + ylab("Number of Businesses")
 b11 <- b11 + theme(axis.text.x=element_text(angle = 45, hjust=1))
 b11 <- incAxisLabelSpace(b11)
 b11
-ggsave(b11, filename="businessCatTop10.png", width=7, height=5, units="in")
+ggsave(b11, filename="Plots/businessCatTop10.png", width=7, height=5, units="in")
 
 # number of categories listed for each business
 categoriesbybus <- buscategories[,-c(2,3,4)]
@@ -174,7 +173,7 @@ b12 <- b12 + ggtitle("Number Categories for Each Business")
 b12 <- b12 + xlab("Number of Categories") + ylab("Density")
 b12 <- incAxisLabelSpace(b12)
 b12
-ggsave(b12, filename="catBusinessCountDensity.png", width=7, height=5, units="in")
+ggsave(b12, filename="Plots/catBusinessCountDensity.png", width=7, height=5, units="in")
 
 # number of categories listed for each business (bar chart)
 b13 <- ggplot(numCatByBus, aes(x=num_of_categories))
@@ -183,11 +182,11 @@ b13 <- b13 + ggtitle("Number Categories for Each Business")
 b13 <- b13 + xlab("Number of Categories") + ylab("Density")
 b13 <- incAxisLabelSpace(b13)
 b13
-ggsave(b13, filename="catBusinessCountBar.png", width=7, height=5, units="in")
+ggsave(b13, filename="Plots/catBusinessCountBar.png", width=7, height=5, units="in")
 
 # number of businesses open or closed
 busOpenSubset <- uniqueBusiness[,c('business_id', 'b_open')]
-openCloseBusiness <- aggregate(.~b_open, busOpen, FUN=length)
+openCloseBusiness <- aggregate(.~b_open, busOpenSubset, FUN=length)
 names(openCloseBusiness)[2] <- "num_of_businesses"
 b14 <- ggplot(openCloseBusiness, aes(y=num_of_businesses, x=b_open)) 
 b14 <- b14 + geom_bar(stat="identity", fill='purple4')
@@ -196,7 +195,7 @@ b14 <- b14 + xlab("Open = True, Closed = False") + ylab("Number of Businesses")
 b14 <- b14 + theme(axis.text.x=element_text(angle = 45, hjust=1))
 b14 <- incAxisLabelSpace(b14)
 b14
-ggsave(b14, filename="openBusinesses.png", width=5, height=5, units="in")
+ggsave(b14, filename="Plots/openBusinesses.png", width=5, height=5, units="in")
 
 # subset data for open or closed businesses for separate analysis
 openBusiness <- business[business$b_open=="True",]
@@ -210,7 +209,7 @@ b15 <- b15 + ggtitle("Number Businesses per Star Rating")
 b15 <- b15 + xlab("Star Ratings") + ylab("Number of Businesses")
 b15 <- incAxisLabelSpace(b15)
 b15
-ggsave(b15, filename="openBusinessStarRatings.png", width=7, height=5, units="in")
+ggsave(b15, filename="Plots/openBusinessStarRatings.png", width=7, height=5, units="in")
 
 # close business star ratings
 b16 <- ggplot(closeBusiness, aes(x=b_stars))
@@ -220,7 +219,7 @@ b16 <- b16 + ggtitle("Number Businesses per Star Rating")
 b16 <- b16 + xlab("Star Ratings") + ylab("Number of Businesses")
 b16 <- incAxisLabelSpace(b16)
 b16
-ggsave(b16, filename="closeBusinessStarRatings.png", width=7, height=5, units="in")
+ggsave(b16, filename="Plots/closeBusinessStarRatings.png", width=7, height=5, units="in")
 
 # Business star rating (b_stars) across all reviews 
 # vs. avg star rating in dataset
@@ -238,4 +237,4 @@ b17 = b17 + ggtitle("Business Average Stars
 b17 = b17 + xlab("Average Stars Across All Reviews")
 b17 = b17 + ylab("Average Stars for Reviews in Data Set")
 b17 = incAxisLabelSpace(b17)
-ggsave(b17, filename="busAvgStarsScatter.png", width=5, height=5, units="in")
+ggsave(b17, filename="Plots/busAvgStarsScatter.png", width=5, height=5, units="in")

@@ -5,12 +5,7 @@ library(RColorBrewer)
 library(MASS)
 
 # Import data
-#setwd("/Users/griffin/Google Drive/USF/Spring1/AdvancedMachineLearning/AdvancedMLProject")
-training <- read.csv("yelp_training.csv")
-
-#setwd("/Users/griffin/Google Drive/USF/Spring1/AdvancedMachineLearning/AdvancedMLProject/Plots")
-
-
+# training <- read.csv("yelp_training.csv")
 
 ## Maps of data, not zoomed
 
@@ -21,7 +16,7 @@ businessLoc = subset(training, !duplicated(training$business_id),
 # Map of businesses
 map = MapBackground(businessLoc$b_latitude, businessLoc$b_longitude)
 purpAlpha = rgb(150, 0, 205, as.integer(255*0.15), maxColorValue=255)
-png("mapBusinesses.png", height=1200, width=1200)
+png("Plots/mapBusinesses.png", height=1200, width=1200)
 PlotOnStaticMap(map, businessLoc$b_latitude, businessLoc$b_longitude, 
                 pch=19, cex=1.5, col=purpAlpha)
 dev.off()
@@ -37,7 +32,7 @@ dev.off()
 
 # Map of reviews
 redAlpha = rgb(255, 0, 0, as.integer(255*0.025), maxColorValue=255)
-png("mapReviews.png", height=1200, width=1200)
+png("Plots/mapReviews.png", height=1200, width=1200)
 PlotOnStaticMap(map, training$b_latitude, training$b_longitude, 
                 pch=19, cex=1.5, col=redAlpha)
 dev.off()
@@ -50,7 +45,7 @@ checkins = subset(training, !is.na(training$b_sum_checkins),
 greenAlpha = rgb(0, 80, 0, 
                 as.integer(checkins$b_sum_checkins/max(checkins$b_sum_checkins)*255), 
                 maxColorValue=255)
-png("mapCheckins.png", height=1200, width=1200)
+png("Plots/mapCheckins.png", height=1200, width=1200)
 PlotOnStaticMap(map, checkins$b_latitude, checkins$b_longitude, 
                 pch=19, cex=1.5, col=greenAlpha)
 dev.off()
@@ -61,7 +56,7 @@ dev.off()
 # Zoomed-In Map of businesses
 zoomBusiness = businessLoc[33.2<businessLoc$b_latitude & businessLoc$b_latitude<33.8
                         & -112.4<businessLoc$b_longitude & businessLoc$b_longitude< -111.75,]
-png("mapBusinessesZoom.png", height=1200, width=1200)
+png("Plots/mapBusinessesZoom.png", height=1200, width=1200)
 PlotOnStaticMap(lat=zoomBusiness$b_latitude, lon=zoomBusiness$b_longitude, 
                 pch=19, cex=3, col=purpAlpha, size=c(640,640))
 dev.off()
@@ -71,7 +66,7 @@ zoomReviews = subset(training,
                      33.2<training$b_latitude & training$b_latitude<33.8
                      & -112.4<training$b_longitude & training$b_longitude< -111.75,
                      select=c(r_review_id, b_latitude, b_longitude))
-png("mapReviewsZoom.png", height=1200, width=1200)
+png("Plots/mapReviewsZoom.png", height=1200, width=1200)
 PlotOnStaticMap(lat=zoomReviews$b_latitude, lon=zoomReviews$b_longitude, 
                 pch=19, cex=3, col=redAlpha, size=c(640,640))
 dev.off()
@@ -82,7 +77,7 @@ zoomCheckins = checkins[33.2<checkins$b_latitude & checkins$b_latitude<33.8
 greenAlphaZoom = rgb(0, 80, 0, 
                 as.integer(zoomCheckins$b_sum_checkins/max(zoomCheckins$b_sum_checkins)*255), 
                 maxColorValue=255)
-png("mapCheckinsZoom.png", height=1200, width=1200)
+png("Plots/mapCheckinsZoom.png", height=1200, width=1200)
 PlotOnStaticMap(lat=zoomCheckins$b_latitude, lon=zoomCheckins$b_longitude, 
                 pch=19, cex=3, col=greenAlphaZoom, size=c(640,640))
 dev.off()

@@ -13,8 +13,6 @@ incAxisLabelSpace = function(plot){
 }
 
 ## Import data
-
-#setwd("/Users/griffin/Google Drive/USF/Spring1/AdvancedMachineLearning/AdvancedMLProject")
 #training = read.csv("yelp_training.csv")
 
 ## Separate out individual data sets
@@ -28,8 +26,6 @@ sum(is.na(users$u_average_stars))
 
 
 ## Plots
-
-#setwd("/Users/griffin/Google Drive/USF/Spring1/AdvancedMachineLearning/AdvancedMLProject/Plots")
 
 # Create a melted data frame of users votes
 # Each row has the vote type (cool, funny, useful) and a number of votes
@@ -49,13 +45,13 @@ p1 = p1 + xlab("Vote Type") + ylab("Number of Votes Across Reviews per User")
 p1 = p1 + coord_flip()
 p1 = incAxisLabelSpace(p1)
 p1
-ggsave(p1, filename="userVotesBoxplots.png", height=6, width=6, units="in")
+ggsave(p1, filename="Plots/userVotesBoxplots.png", height=6, width=6, units="in")
 
 # Limit the range displayed because distributions are heavily right-skewed
 p1 = p1 + ylim(0,quantile(userVotesMelt$num, 0.75))
 p1 = p1 + ggtitle("Boxplots of Number of User Votes by Vote Type
                   Limited Range")
-ggsave(p1, filename="userVotesBoxplotsLim.png", height=6, width=6, units="in")
+ggsave(p1, filename="Plots/userVotesBoxplotsLim.png", height=6, width=6, units="in")
 
 
 # Barchart of number of total votes for each vote category
@@ -65,7 +61,7 @@ p2 = p2 + ggtitle("Total User Votes for Each Vote Type")
 p2 = p2 + xlab("Vote Type") + ylab("Number of Votes")
 p2 = incAxisLabelSpace(p2)
 p2
-ggsave(p2, filename="userVotesBarplot.png", height=5, width=5, units="in")
+ggsave(p2, filename="Plots/userVotesBarplot.png", height=5, width=5, units="in")
 
 
 # Density Plot of user average ratings
@@ -80,7 +76,7 @@ p3 = p3 + geom_text(label=paste("Mean:", signif(meanRating,5)),
 p3 = p3 + ggtitle("User Average Stars for Reviews")
 p3 = p3 + xlab("Average Stars") + ylab('Density')
 p3 = incAxisLabelSpace(p3)
-ggsave(p3, filename="userAvgRatingDensity.png", width=6, height=4, units="in")
+ggsave(p3, filename="Plots/userAvgRatingDensity.png", width=6, height=4, units="in")
 
 
 # Density of user review counts
@@ -96,7 +92,7 @@ p4 = p4 + geom_text(x=2000, y=0.04, size=3,
                     label=paste("Median Review Count:", medCnt))
 p4 = p4 + ggtitle("User Review Counts")
 p4 = p4 + xlab("Number of Reviews") + ylab("Density")
-ggsave(p4, filename="userReviewCntDensity.png", width=6, height=4, units="in")
+ggsave(p4, filename="Plots/userReviewCntDensity.png", width=6, height=4, units="in")
 
 
 # Barchart: Total number of reviews in dataset vs. number of
@@ -111,7 +107,7 @@ p5 = p5 + geom_text(aes(label=revTotals$num), vjust=-0.3, size=3)
 p5 = p5 + ggtitle("Reviews in Data Set vs. All Reviews by Users")
 p5 = p5 + xlab("Review Source") + ylab("Number of Reviews")
 p5 = incAxisLabelSpace(p5)
-ggsave(p5, filename="reviewCountsBar.png", width=5, height=5, units="in")
+ggsave(p5, filename="Plots/reviewCountsBar.png", width=5, height=5, units="in")
 
 
 # Barchart: number of users in data set vs number of users 
@@ -125,7 +121,7 @@ p6 = p6 + geom_text(aes(label=usrTotals$num), vjust=-0.3, size=3)
 p6 = p6 + ggtitle("Users in Review Data vs. Users in User Data")
 p6 = p6 + xlab("User Source") + ylab("Number of Reviews")
 p6 = incAxisLabelSpace(p6)
-ggsave(p6, filename="userCountsBar.png", width=5, height=5, units="in")
+ggsave(p6, filename="Plots/userCountsBar.png", width=5, height=5, units="in")
 
 
 # Pairs Plot: user vote types
@@ -134,7 +130,7 @@ names(userVotes) = c("cool", "funny", "useful")
 userVotes = userVotes/1000
 p7 = ggpairs(userVotes, params=list(labelSize=7), 
              title="Number of Votes (thousands) for Users' Reviews by Category")
-png("userVotesPairs.png", height=5, width=7, units="in", res=300)
+png("Plots/userVotesPairs.png", height=7, width=7, units="in", res=300)
 p7
 dev.off()
 
@@ -156,7 +152,7 @@ p8 = p8 + ggtitle("User Average Stars
 p8 = p8 + xlab("Average Stars Across All Reviews")
 p8 = p8 + ylab("Average Stars for Reviews in Data Set")
 p8 = incAxisLabelSpace(p8)
-ggsave(p8, filename="userAvgStarsScatter.png", width=5, height=5, units="in")
+ggsave(p8, filename="Plots/userAvgStarsScatter.png", width=5, height=5, units="in")
 
 # Worth fixing???
 bitterPrick = subset(userAvgStars, u_average_stars==0)
