@@ -71,7 +71,19 @@ def roughImpute(df):
 
 
 if __name__=='__main__':
+
+    # Read CSV files to pandas dataframes
     training = pd.read_csv("yelp_training.csv")
+    test = pd.read_csv("yelp_test.csv")
+
+    # Reduce variables, create dummies for categorical variables
     training = updateColumns(training)
+    test = updateColumns(test)
+
+    # Impute missing values with column mean
     training = roughImpute(training)
+    test = roughImpute(test)
+
+    # Save to new CSV
     training.to_csv('training_init.csv', index=False, encoding='utf-8')
+    test.to_csv('testing_init.csv', index=False, encoding='utf-8')
