@@ -5,10 +5,10 @@ from data_cleaning import *
 import re
 
 # set the location of the data sets
-bus_data = "yelp_test_set/yelp_test_set_business.json"
-rev_data = "yelp_test_set/yelp_test_set_review.json"
-usr_data = "yelp_test_set/yelp_test_set_user.json"
-chk_data = "yelp_test_set/yelp_test_set_checkin.json"
+bus_data = "final_test_set/final_test_set_business.json"
+rev_data = "final_test_set/final_test_set_review.json"
+usr_data = "final_test_set/final_test_set_user.json"
+chk_data = "final_test_set/final_test_set_checkin.json"
 
 # open and rename all of the data sets
 bus = RenameCols(CityFix(OpenFile(bus_data)), 'b')
@@ -46,4 +46,4 @@ full = pd.merge(full, chk, on='business_id', how='left')
 print "Merged in checkin data"
 
 # export to csv to do exploratory data analysis
-full.to_csv('yelp_test.csv', index=False, encoding='utf-8')
+full.to_csv('final_test.csv', index=False, encoding='utf-8')
