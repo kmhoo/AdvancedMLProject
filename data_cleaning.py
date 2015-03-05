@@ -3,6 +3,8 @@ __author__ = 'kaileyhoo'
 import pandas as pd
 import json
 import re
+import random
+import numpy as np
 
 # function to open the JSON file and return it as a dataframe
 def OpenFile(path):
@@ -38,6 +40,14 @@ def CityFix(df):
             df.loc[l, 'city'] = 'Phoenix'
         elif city == 'Scottsdale ':
             df.loc[l, 'city'] = 'Scottsdale'
+    return df
+
+# shuffle the rows to randomize the data
+def shuffle(df):
+    index = list(df.index)
+    random.shuffle(index)
+    df = df.ix[index]
+    df.reset_index()
     return df
 
 if __name__ == "__main__":
@@ -91,5 +101,18 @@ if __name__ == "__main__":
     full = pd.merge(full, chk, on='business_id', how='left')
     print "Merged in checkin data"
 
-    # export to csv to do exploratory data analysis
-    full.to_csv('yelp_training.csv', index=False, encoding='utf-8')
+    # shuffle the indices of the dataset
+    full_shuffle = shuffle(full)
+
+    # split the data into training and test sets based on 80/20
+    split = int(len(full)*0.8)
+    training = full_shuffle[:split]
+    test = full_shuffle[split:]
+
+    # get just the reviews text from training data
+    text = training['r_text']
+    text.to_csv('yelp_review_text.csv', index=False, encoding='utf-8')
+
+    # export to csv
+    training.to_csv('yelp_training.csv', index=False, encoding='utf-8')
+    test.to_csv('yelp_test.csv', index=False, encoding='utf-8')
