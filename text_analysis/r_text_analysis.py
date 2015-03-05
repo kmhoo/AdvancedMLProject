@@ -141,7 +141,7 @@ def get_ngrams(tokens):
 
 if __name__=="__main__":
     # pull user review text from data
-    x = get_reviews("yelp_review_text.csv")
+    x = get_reviews("../yelp_review_text.csv")
     reviews = []
 
     # convert to list of strings; output is a list of sentences

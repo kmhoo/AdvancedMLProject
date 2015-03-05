@@ -36,8 +36,8 @@ def round1(X, y):
 def round2(X, y):
     # Set parameters
     min_score = {}
-    for tree in [10, 50, 100, 200, 500, 1000]:
-        for feature in [20, 50, 100, 'auto', 'log2', 'sqrt']:
+    for tree in [50, 100, 200, 500]:
+        for feature in ['auto', 'log2', 'sqrt']:
             model = RandomForestRegressor(n_estimators=tree, max_features=feature)
             n = len(y)
 
