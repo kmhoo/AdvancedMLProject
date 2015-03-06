@@ -31,14 +31,14 @@ def get_reviews(fname):
     try:
         with open(fname, "rb") as infile:
             df = pd.DataFrame.from_csv(infile, header=0, index_col=False)
-
             # drop any review entries that are blank
-            df = df.dropna()
+            print "length of df: ", len(df)
+            df = list(df['r_text'].dropna())
+            print "... after removing NAs: ", len(df)
             # clean up text to remove punctuation and empty reviews
-            reviewsList[:] = [s.replace('\n', '').lower() for s in df]
+            reviewsList = [s.replace('\n', '').lower() for s in df]
 
-
-        return df
+        return reviewsList
     except:
         raise IOError
 
@@ -80,11 +80,13 @@ def text_preprocessing(textIter):
     # clean up text to remove punctuation and empty reviews
     reviewsList[:] = [s.translate(None, string.punctuation).lower().split()
                       if str(s) not in (None, 'nan', '') else '' for s in reviewsList]
-    # reviewsList[:] = [str(s).decode('utf-8') if str(s) not in (None, 'nan', '') else '' for s in reviewsList]
 
     # group the list of strings together and remove stopwords
     reviewsList[:] = list(itertools.chain(*reviewsList))
+    print "count of tokens before stopword removal: ", len(reviewsList)
     reviewsList = [word for word in reviewsList if word not in stopwords]
+    reviewsList = [word for word in reviewsList if re.search(r'[a-zA-Z]', word) is not None]
+    print "count of tokens after stopword removal: ", len(reviewsList)
 
     # join all reviews together into one string
     tokens = nltk.word_tokenize(" ".join(reviewsList))
@@ -98,7 +100,7 @@ def get_ngrams(tokens):
     :return: outputs unigram, bigram, and trigram files
     """
 
-    print tokens
+    # print tokens
 
     print "processing N-grams"
     # collect the bigrams and trigrams
@@ -107,6 +109,8 @@ def get_ngrams(tokens):
     # cfd = nltk.ConditionalFreqDist(bigrams)
 
     unigrams = Counter(tokens)
+    print "Total tokens (after stopword removal)"
+    print "Unique unigrams: ", len(unigrams)
     print "unigram frequencies generated"
     bigramFdist = nltk.FreqDist(bigrams)
     print "bigram frequencies generated"
@@ -115,25 +119,25 @@ def get_ngrams(tokens):
 
     # write out n-gram lists to file
     path1 = 'review_unigrams.csv'
-    # writer = csv.writer(open(path1, 'wb'))
-    # for term, val in unigrams.most_common():
+    writer = csv.writer(open(path1, 'wb'))
+    for term, val in unigrams.most_common():
         # print term, val
-        # writer.writerow([term, val])
+        writer.writerow([term, val])
     print "Unigrams done: ", str(path1)
 
     path2 = 'review_bigrams.csv'
-    # writer2 = csv.writer(open(path2, 'wb'))
-    # for term, val in bigramFdist.items():
+    writer2 = csv.writer(open(path2, 'wb'))
+    for term, val in bigramFdist.items():
         # print term, val
-        # writer2.writerow([term, val])
+        writer2.writerow([term, val])
     print "Bigrams done: ", str(path2)
 
 
     path3 = 'review_trigrams.csv'
-    # writer3 = csv.writer(open(path3, 'wb'))
-    # for term, val in trigramFdist.items():
+    writer3 = csv.writer(open(path3, 'wb'))
+    for term, val in trigramFdist.items():
         # print term, val
-        # writer3.writerow([term, val])
+        writer3.writerow([term, val])
     print "Trigrams done: ", str(path3)
 
 
@@ -141,13 +145,15 @@ def get_ngrams(tokens):
 
 if __name__=="__main__":
     # pull user review text from data
-    x = get_reviews("../yelp_review_text.csv")
+    x = get_reviews("yelp_review_text.csv")
     reviews = []
 
+    # print len(x)
     # convert to list of strings; output is a list of sentences
-    reviewsList = list(x.values.flatten())
+    # reviewsList = list(x.values.flatten())
+    reviewsList = x
     print "list of review sentences generated"
-
+    # print reviewsList[:3]
     # get tokens for all reviews
     tokens = text_preprocessing(reviewsList)
     print "review text tokenized"
