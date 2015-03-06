@@ -107,7 +107,7 @@ ggsave(b7, filename="Plots/businessCitiesTop15.png", width=7, height=5, units="i
 buscategories <- uniqueBusiness[,-c(2,4,5,6,7,8,519)]
 
 # sum each of the categories
-justcategories <- buscategories[,-c(1,2,3,4)]
+justcategories <- buscategories[,-c(1,2,3,4,5)]
 catSum <- colSums(justcategories)
 catSumMelt <- melt(catSum)
 catSumMelt$category = row.names(catSumMelt)
@@ -136,8 +136,8 @@ b9
 ggsave(b9, filename="Plots/businessCat.png", width=15, height=5, units="in")
 
 # mean and median on businesses per category
-meanCat <- mean(catSumMelt$value)
-medianCat <- median(catSumMelt$value)
+meanCat <- mean(catSumMelt$num_of_businesses)
+medianCat <- median(catSumMelt$num_of_businesses)
 
 # top 50 categories with the most businesses
 catSum50 <- catSumMelt[1:50,]
@@ -162,10 +162,10 @@ b11
 ggsave(b11, filename="Plots/businessCatTop10.png", width=7, height=5, units="in")
 
 # number of categories listed for each business
-categoriesbybus <- buscategories[,-c(2,3,4)]
-busByCategory <- rowSums(categoriesbybus[2:509])
+categoriesbybus <- buscategories[,-c(2,3,4,5)]
+busByCategory <- rowSums(categoriesbybus[2:508])
 numCatByBus <- cbind(categoriesbybus, busByCategory)
-numCatByBus <- numCatByBus[,c(1,510)]
+numCatByBus <- numCatByBus[,c(1,509)]
 names(numCatByBus)[2] <- "num_of_categories"
 b12 <- ggplot(numCatByBus, aes(x=num_of_categories))
 b12 <- b12 + geom_density(colour="purple4", fill="purple2", alpha=0.2)
