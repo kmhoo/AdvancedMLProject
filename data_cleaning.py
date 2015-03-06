@@ -42,8 +42,26 @@ def CityFix(df):
             df.loc[l, 'city'] = 'Scottsdale'
     return df
 
+
+def CategoryDummies(df):
+    # Extract list of business categories - 508 total
+    bus_categories = [item for sublist in list(df['b_categories']) for item in sublist]
+    bus_categories = sorted(list(set(bus_categories)))
+
+    # Create dummy variable for each category
+    # Remove all spaces and characters in the name of category
+    # Rename with b_categories
+    for cat in bus_categories:
+        df[cat] = [1 if cat in row else 0 for row in df['b_categories']]
+        cat2 = re.sub(u'[ &/-]', u'', cat)
+        df.rename(columns={cat: 'b_categories_'+cat2}, inplace=True)
+
+    return df
+
+
 # shuffle the rows to randomize the data
 def shuffle(df):
+    random.seed(7)
     index = list(df.index)
     random.shuffle(index)
     df = df.ix[index]
@@ -81,18 +99,6 @@ if __name__ == "__main__":
     rev_votes = RenameCols(rev_votes, "r_votes")
     rev = pd.concat([rev, rev_votes], axis=1)
 
-    # Extract list of business categories - 508 total
-    bus_categories = [item for sublist in list(bus['b_categories']) for item in sublist]
-    bus_categories = sorted(list(set(bus_categories)))
-    # Create dummy variable for each category
-    # Note: must remove one dummy to avoid multicollinearity
-    # Remove all spaces and characters in the name of category
-    # Rename with b_categories
-    for cat in bus_categories:
-        bus[cat] = [1 if cat in row else 0 for row in bus['b_categories']]
-        cat2 = re.sub(u'[ &/-]', u'', cat)
-        bus.rename(columns={cat: 'b_categories_'+cat2}, inplace=True)
-
     # merge all of the datasets together on user and business ids
     full = pd.merge(rev, usr, on='user_id', how='left')
     print "Merged reviews & user datasets"
@@ -109,10 +115,19 @@ if __name__ == "__main__":
     training = full_shuffle[:split]
     test = full_shuffle[split:]
 
-    # get just the reviews text from training data
-    text = training['r_text']
-    text.to_csv('yelp_review_text.csv', index=False, encoding='utf-8')
+    print training.shape
+    print test.shape
+
+    training = CategoryDummies(training)
+    test = CategoryDummies(test)
+
+    print training.shape
+    print test.shape
 
     # export to csv
     training.to_csv('yelp_training.csv', index=False, encoding='utf-8')
     test.to_csv('yelp_test.csv', index=False, encoding='utf-8')
+
+    # get just the reviews text from training data
+    text = training.loc[:, ['user_id', 'r_text']]
+    text.to_csv('yelp_review_text.csv', index=False, encoding='utf-8')
