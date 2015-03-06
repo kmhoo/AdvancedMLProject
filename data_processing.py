@@ -21,10 +21,6 @@ def updateColumns(df):
         elif col == u'r_stars':
             df.rename(columns={col: 'target'}, inplace=True)
 
-        # exlude one of the categories to avoid multicollinearity
-        elif col == u'b_categories_Accessories':
-            df.drop(col, axis=1, inplace=True)
-
         # change date to epoch time
         elif col == u'r_date':
             df[col] = pd.to_datetime(df[col]).astype(np.int64) // 10**9
@@ -70,6 +66,38 @@ def roughImpute(df):
     return df
 
 
+def commonDummies(train_df, test_df):
+    """
+    Force test set to have same dummy variables for city/business categories
+    as the training set. Eliminate dummies in test that aren't in training,
+    add column of zeros for dummies in training that aren't in test.
+    :param train_df: Pandas dataframe
+    :param test_df: Pandas dataframe
+    :return: modified Pandas dataframes
+    """
+
+    # Find dummy variables for business city and categories
+    dummies_train = [col for col in train_df.columns if re.search(u'b_categories_|b_city_', col) is not None]
+    dummies_test = [col for col in test_df.columns if re.search(u'b_categories_|b_city', col) is not None]
+
+    # Find dummy variables that are in one data set and not the other
+    dummies_not_in_train = list(set(dummies_test) - set(dummies_train))
+    dummies_not_in_test = list(set(dummies_train) - set(dummies_test))
+
+    # Drop dummy variables from test that aren't in the training
+    test_df.drop(dummies_not_in_train)
+
+    # Add dummy variables to test that aren't already there, set them to 0
+    for cat in dummies_not_in_test:
+        test_df[cat] = 0
+
+    # Sort columns so that they're in the same order for both data frames
+    train_df.sort(axis=1, inplace=True)
+    test_df.sort(axis=1, inplace=True)
+
+    return train_df, test_df
+
+
 if __name__=='__main__':
 
     # Read CSV files to pandas dataframes
@@ -83,6 +111,9 @@ if __name__=='__main__':
     # Impute missing values with column mean
     training = roughImpute(training)
     test = roughImpute(test)
+
+    # Force test data to have same dummy variable columns as training data
+    training, test = commonDummies(training, test)
 
     # Save to new CSV
     training.to_csv('training_init.csv', index=False, encoding='utf-8')
