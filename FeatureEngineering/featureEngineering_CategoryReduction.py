@@ -6,25 +6,23 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from data_processing import numpyArrays
 
-def reduceCategories(train_df, test_df):
+def reduceCategories(train_arr, test_arr, col_indices):
     """
-    Uses PCA to reduce the number of features for business category from
-    507 to 100. Fits principal components on training data and transforms
-    both the training and test data to replace category features with these components.
-    :param train_df: Pandas dataframe for training data
-    :param test_df: Pandas dataframe for test data
-    :return: both dataframes with replaced columns
+    Uses PCA to reduce the number of features for business category to 100.
+    Fits principal components on training data and transforms both the
+    training and test data to replace category features with these components.
+    :param train_arr: Numpy array for training data
+    :param test_arr: Numpy array for test data
+    :param col_indices: which columns to use in PCA
+    :return: both arrays with replaced columns
     """
 
-    # Find names of business category columns
-    category_col = [col for col in train_df.columns if 'b_categories_' in col]
-
-    # Extract business category columns, convert to numpy arrays
-    categories_train = np.asarray(train_df[category_col])
-    categories_test = np.asarray(test_df[category_col])
+    # Subset train/test data to only use specified category columns
+    categories_train = train_arr[:, col_indices]
+    categories_test = test_arr[:, col_indices]
 
     # Fit PCA on the training categories
-    pca = PCA()
+    pca = PCA(n_components=100)
     pca.fit(categories_train)
 
     # Transform training and test categories into components
@@ -32,7 +30,15 @@ def reduceCategories(train_df, test_df):
     components_test = pca.transform(categories_test)
     print components_train
 
-    # Append new
+    # Remove original category columns
+    train_arr_new = np.delete(train_arr, col_indices, axis=1)
+    test_arr_new = np.delete(test_arr, col_indices, axis=1)
+
+    # Append component columns
+    train_arr_new = np.hstack((train_arr_new, components_train))
+    test_arr_new = np.hstack((test_arr_new, components_test))
+
+    return train_arr_new, test_arr_new
 
 
 if __name__ == "__main__":
@@ -62,5 +68,5 @@ if __name__ == "__main__":
     plt.title('Scree Plot')
     plt.xlabel('Number of Principal Components')
     plt.ylabel('Proportion of Variance Explained')
-    plt.savefig("pca.png")
+    plt.savefig("pca_scree.png")
     plt.close()
