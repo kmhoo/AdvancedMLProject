@@ -2,11 +2,12 @@ __author__ = 'jrbaker'
 """featureEngineering_textFeatures.py - script to generate n-gram features for user rating predictions
 """
 
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 import nltk, string, csv, itertools
 import pandas as pd
 from nltk.stem import wordnet
 from nltk.tokenize import RegexpTokenizer, punkt, WordPunctTokenizer
+from collections import Counter
 
 def get_reviews(fname):
     """
@@ -17,14 +18,13 @@ def get_reviews(fname):
     try:
         with open(fname, "rb") as infile:
             df = pd.DataFrame.from_csv(infile, header=0, index_col=False)
-            print df.columns
+            # print len(df)
             # drop any review entries that are blank
             df.dropna()
 
             # remove all newline characters from each entry
-            df.replace({'\n' : ''}, inplace=True)
-            # df.apply(lambda x: x.str.replace('\n', ''))
-
+            df['r_text'] = df['r_text'].str.replace('\n', ' ')
+            # print len(df)
         return df
     except:
         raise IOError
@@ -33,7 +33,7 @@ def get_reviews(fname):
 def text_preprocessing(textIter):
     """
     remove stopwords, punctuation, etc., and stem/tokenize text strings
-    :param textIter: iterable of text (e.g. list, dataframe, etc.)
+    :param textIter: iterable of user_id, text (e.g. list, dataframe, etc.)
     :return: list of tokens, grouped by document
     """
     stopwords = nltk.corpus.stopwords.words('english')
@@ -66,16 +66,46 @@ def text_preprocessing(textIter):
 
 
 if __name__=="__main__":
-    path = "yelp_review_text.csv"
+    path = "text_analysis/yelp_review_text.csv"
+    corpus = []
 
-    reviewCorpus = get_reviews(path)
-    print "1: ", reviewCorpus.ix[2,:]
+    reviews = get_reviews(path)
+    # [u'user_id', u'r_text']
 
-    reviewCorpus = list(reviewCorpus.values.flatten())
     print "starting preprocess"
-    print "2: ", reviewCorpus[2]
+    print reviews.ix[1,:]
 
-    reviewTokens = text_preprocessing(reviewCorpus)
 
-    # print type(reviewTokens)
+    # get count of reviews by userid
+    userReviewCounts = Counter(list(reviews['user_id']))
+    # print len(userReviewCounts)
+
+    print userReviewCounts['BRNVGPDi58XPDyxfxX39sg']
+    bigram_vectorizer = CountVectorizer(ngram_range=(2,3), token_pattern=r'\b\w+\b', min_df=1)
+    # create a list of "cleaned-up" strings for bigram vectorizer processing
+
+    # print reviews.dtypes
+    # 1. aggregate reviews by user ("document")
+    userReviews = reviews.groupby('user_id')['r_text'].apply(list)
+
+    print len(userReviews['BRNVGPDi58XPDyxfxX39sg'])
+    # 2. calculate tf-idf for bigram/trigram features
+
+    # 3. apply weight to each user: 1/(# reviews by user)
+
+
+    # for docString in docStrings:
+        # print " ".join(docString)
+        # corpus.append(" ".join(docString))
+        #
+        # transformer = TfidfTransformer()
+        #
+        # tfidf = transformer.fit_transform(X_2)
+        #
+        # print bigram_vectorizer.get_feature_names()
+        # print tfidf.toarray()
+
+
+
+
 
