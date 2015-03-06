@@ -13,7 +13,7 @@ incAxisLabelSpace = function(plot){
 }
 
 ## Import data
-#training = read.csv("yelp_training.csv")
+training = read.csv("yelp_training.csv")
 
 ## Separate out individual data sets
 
@@ -130,7 +130,7 @@ names(userVotes) = c("cool", "funny", "useful")
 userVotes = userVotes/1000
 p7 = ggpairs(userVotes, params=list(labelSize=7), 
              title="Number of Votes (thousands) for Users' Reviews by Category")
-png("Plots/userVotesPairs.png", height=7, width=7, units="in", res=300)
+png("Plots/userVotesPairs.png", height=6, width=6, units="in", res=300)
 p7
 dev.off()
 
