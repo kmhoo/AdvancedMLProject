@@ -83,8 +83,8 @@ if __name__ == "__main__":
     r1_scores = round1(X, y)
     print r1_scores
     # No hyperparameters chosen
-    # Scores: [1.1369880333144828, 1.1306818078000924, 1.1269938727261339, 1.1344971460978877, 1.1305960630682839]
-    # Average Score: 1.1319513846
+    # Scores: [1.1321764568822179, 1.1286956765869198, 1.1308979886240338, 1.1259411999639266, 1.1314307515987174]
+    # Average Score: 1.12982841473
 
     r2_scores = round2(X, y)
     print r2_scores
