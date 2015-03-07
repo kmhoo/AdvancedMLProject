@@ -61,7 +61,8 @@ def CategoryDummies(df):
 def excludeTesting(train_set, test_set):
     user_dict = {}
     bus_dict = {}
-    for te_row in test_set.iterrows():
+    # go through the test set to get all unique users and businesses
+    for te, te_row in test_set.iterrows():
         # sum all reviews, stars, and votes in the test set by user and business
         if te_row['user_id'] in user_dict.keys():
             user_dict[te_row['user_id']]['review_count'] += 1
@@ -78,35 +79,28 @@ def excludeTesting(train_set, test_set):
         if te_row['business_id'] in bus_dict.keys():
             bus_dict[te_row['business_id']]['review_count'] += 1
             bus_dict[te_row['business_id']]['review_stars'] += te_row['r_stars']
-            bus_dict[te_row['business_id']]['r_votes_cool'] += te_row['r_votes_cool']
-            bus_dict[te_row['business_id']]['r_votes_funny'] += te_row['r_votes_funny']
-            bus_dict[te_row['business_id']]['r_votes_useful'] += te_row['r_votes_useful']
         else:
             bus_dict[te_row['business_id']] = {'review_count': 1,
-                                               'review_stars': te_row['r_stars'],
-                                               'r_votes_cool': te_row['r_votes_cool'],
-                                               'r_votes_funny': te_row['r_votes_funny'],
-                                               'r_votes_useful': te_row['r_votes_useful']}
+                                               'review_stars': te_row['r_stars']}
 
-    for tr_row in train_set.iterrows():
+    # update the training data for businesses and users
+    for tr, tr_row in train_set.iterrows():
         # update user information to exclude test reviews
         if tr_row['user_id'] in user_dict.keys():
             new_review_total = tr_row['u_review_count'] - user_dict[tr_row['user_id']]['review_count']
             tr_row['u_average_stars'] = ((tr_row['u_average_stars'] * tr_row['u_review_count']) -
-                                         user_dict[row['user_id']]['review_stars']) / new_review_total
+                                         user_dict[tr_row['user_id']]['review_stars']) / new_review_total
             tr_row['u_review_count'] = new_review_total
             tr_row['u_votes_funny'] = tr_row['u_votes_funny'] - user_dict[tr_row['user_id']]['r_votes_funny']
             tr_row['u_votes_cool'] = tr_row['u_votes_cool'] - user_dict[tr_row['user_id']]['r_votes_cool']
             tr_row['u_votes_useful'] = tr_row['u_votes_useful'] - user_dict[tr_row['user_id']]['r_votes_useful']
+
         # update business information to exclude test reviews
         if tr_row['business_id'] in bus_dict.keys():
-            new_review_total_b = tr_row['b_review_count'] - bus_dict[row['business_id']]['review_count']
+            new_review_total_b = tr_row['b_review_count'] - bus_dict[tr_row['business_id']]['review_count']
             tr_row['b_stars'] = ((tr_row['b_stars'] * tr_row['b_review_count']) -
                                  bus_dict[tr_row['business_id']]['review_stars']) / new_review_total_b
             tr_row['b_review_count'] = new_review_total_b
-            tr_row['b_votes_funny'] = tr_row['b_votes_funny'] - bus_dict[tr_row['business_id']]['r_votes_funny']
-            tr_row['b_votes_cool'] = tr_row['b_votes_cool'] - bus_dict[tr_row['business_id']]['r_votes_cool']
-            tr_row['b_votes_useful'] = tr_row['b_votes_useful'] - bus_dict[tr_row['business_id']]['r_votes_useful']
 
     return train_set
 
