@@ -13,7 +13,7 @@ incAxisLabelSpace = function(plot){
 }
 
 ## Import data
-training = read.csv("yelp_training.csv")
+# training = read.csv("yelp_training.csv")
 
 ## Separate out individual data sets
 
@@ -153,3 +153,4 @@ p8 = p8 + xlab("Average Stars Across All Reviews")
 p8 = p8 + ylab("Average Stars for Reviews in Data Set")
 p8 = incAxisLabelSpace(p8)
 ggsave(p8, filename="Plots/userAvgStarsScatter.png", width=5, height=5, units="in")
+

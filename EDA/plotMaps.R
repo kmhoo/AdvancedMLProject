@@ -81,3 +81,4 @@ png("Plots/mapCheckinsZoom.png", height=1200, width=1200)
 PlotOnStaticMap(lat=zoomCheckins$b_latitude, lon=zoomCheckins$b_longitude, 
                 pch=19, cex=3, col=greenAlphaZoom, size=c(640,640))
 dev.off()
+
