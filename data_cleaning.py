@@ -160,14 +160,18 @@ if __name__ == "__main__":
     split = int(len(full)*0.8)
     training = full_shuffle[:split]
     test = full_shuffle[split:]
+    print "Split the data"
 
     # create dummy variables for business categories
     training = CategoryDummies(training)
     test = CategoryDummies(test)
+    print "Created category dummies"
 
     # remove any review information that are in the test set
     training = excludeTesting(training, test)
+    print "Excluded any review information about test set"
 
+    print "Exporting to CSV"
     # export to csv
     training.to_csv('yelp_training.csv', index=False, encoding='utf-8')
     test.to_csv('yelp_test.csv', index=False, encoding='utf-8')
@@ -175,3 +179,4 @@ if __name__ == "__main__":
     # get just the reviews text from training data
     text = training.loc[:, ['user_id', 'r_text']]
     text.to_csv('yelp_review_text.csv', index=False, encoding='utf-8')
+    print "Finished"
