@@ -161,9 +161,11 @@ if __name__ == "__main__":
     training = full_shuffle[:split]
     test = full_shuffle[split:]
 
+    # create dummy variables for business categories
     training = CategoryDummies(training)
     test = CategoryDummies(test)
 
+    # remove any review information that are in the test set
     training = excludeTesting(training, test)
 
     # export to csv
