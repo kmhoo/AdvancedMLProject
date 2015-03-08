@@ -52,55 +52,78 @@ def CategoryDummies(df):
     # Remove all spaces and characters in the name of category
     # Rename with b_categories
     for cat in bus_categories:
-        df[cat] = [1 if cat in row else 0 for row in df['b_categories']]
+        df[cat] = np.asarray([1 if cat in row else 0 for row in df['b_categories']])
         cat2 = re.sub(u'[ &/-]', u'', cat)
         df.rename(columns={cat: 'b_categories_'+cat2}, inplace=True)
 
     return df
 
 def excludeTesting(train_set, test_set):
-    user_dict = {}
-    bus_dict = {}
-    # go through the test set to get all unique users and businesses
-    for te, te_row in test_set.iterrows():
-        # sum all reviews, stars, and votes in the test set by user and business
-        if te_row['user_id'] in user_dict.keys():
-            user_dict[te_row['user_id']]['review_count'] += 1
-            user_dict[te_row['user_id']]['review_stars'] += te_row['r_stars']
-            user_dict[te_row['user_id']]['r_votes_cool'] += te_row['r_votes_cool']
-            user_dict[te_row['user_id']]['r_votes_funny'] += te_row['r_votes_funny']
-            user_dict[te_row['user_id']]['r_votes_useful'] += te_row['r_votes_useful']
-        else:
-            user_dict[te_row['user_id']] = {'review_count': 1,
-                                            'review_stars': te_row['r_stars'],
-                                            'r_votes_cool': te_row['r_votes_cool'],
-                                            'r_votes_funny': te_row['r_votes_funny'],
-                                            'r_votes_useful': te_row['r_votes_useful']}
-        if te_row['business_id'] in bus_dict.keys():
-            bus_dict[te_row['business_id']]['review_count'] += 1
-            bus_dict[te_row['business_id']]['review_stars'] += te_row['r_stars']
-        else:
-            bus_dict[te_row['business_id']] = {'review_count': 1,
-                                               'review_stars': te_row['r_stars']}
+    # user_dict = {}
+    # bus_dict = {}
+    # # go through the test set to get all unique users and businesses
+    # for te, te_row in test_set.iterrows():
+    #     # sum all reviews, stars, and votes in the test set by user and business
+    #     if te_row['user_id'] in user_dict.keys():
+    #         user_dict[te_row['user_id']]['review_count'] += 1
+    #         user_dict[te_row['user_id']]['review_stars'] += te_row['r_stars']
+    #         user_dict[te_row['user_id']]['r_votes_cool'] += te_row['r_votes_cool']
+    #         user_dict[te_row['user_id']]['r_votes_funny'] += te_row['r_votes_funny']
+    #         user_dict[te_row['user_id']]['r_votes_useful'] += te_row['r_votes_useful']
+    #     else:
+    #         user_dict[te_row['user_id']] = {'review_count': 1,
+    #                                         'review_stars': te_row['r_stars'],
+    #                                         'r_votes_cool': te_row['r_votes_cool'],
+    #                                         'r_votes_funny': te_row['r_votes_funny'],
+    #                                         'r_votes_useful': te_row['r_votes_useful']}
+    #     if te_row['business_id'] in bus_dict.keys():
+    #         bus_dict[te_row['business_id']]['review_count'] += 1
+    #         bus_dict[te_row['business_id']]['review_stars'] += te_row['r_stars']
+    #     else:
+    #         bus_dict[te_row['business_id']] = {'review_count': 1,
+    #                                            'review_stars': te_row['r_stars']}
+
+    # Faster computation? Using pandas aggregate functions
+    # Calculate number of reviews, total stars awarded, total votes (useful, funny, cool)
+    # for each user in the test set
+    test_set.loc[:, 'review_count'] = 1
+    test_users = test_set.groupby('user_id', as_index=False).aggregate({'review_count': np.sum,
+                                                                        'r_stars': np.sum,
+                                                                        'r_votes_useful': np.sum,
+                                                                        'r_votes_cool': np.sum,
+                                                                        'r_votes_funny': np.sum})
+    test_users.rename(columns={'r_stars': 'review_stars'}, inplace=True)
+
+    # Convert pandas data frame to dictionary (key=user_id)
+    user_dict = test_users.set_index('user_id').to_dict()
+
+    # Calculate number of reviews and total stars received for each business in the test data
+    test_bus = test_set.groupby('business_id', as_index=False).aggregate({'review_count': np.sum,
+                                                                          'r_stars': np.sum})
+    test_users.rename(columns={'r_stars': 'review_stars'}, inplace=True)
+
+    # Convert to dictionary (key=business_id)
+    bus_dict = test_bus.set_index('business_id').to_dict()
+
 
     # update the training data for businesses and users
     for tr, tr_row in train_set.iterrows():
         # update user information to exclude test reviews
         if tr_row['user_id'] in user_dict.keys():
             new_review_total = tr_row['u_review_count'] - user_dict[tr_row['user_id']]['review_count']
-            tr_row['u_average_stars'] = ((tr_row['u_average_stars'] * tr_row['u_review_count']) -
+            train_set.loc[tr, 'u_average_stars'] = ((tr_row['u_average_stars'] * tr_row['u_review_count']) -
                                          user_dict[tr_row['user_id']]['review_stars']) / new_review_total
-            tr_row['u_review_count'] = new_review_total
-            tr_row['u_votes_funny'] = tr_row['u_votes_funny'] - user_dict[tr_row['user_id']]['r_votes_funny']
-            tr_row['u_votes_cool'] = tr_row['u_votes_cool'] - user_dict[tr_row['user_id']]['r_votes_cool']
-            tr_row['u_votes_useful'] = tr_row['u_votes_useful'] - user_dict[tr_row['user_id']]['r_votes_useful']
+            train_set.loc[tr, 'u_review_count'] = new_review_total
+            train_set.loc[tr, 'u_votes_funny'] = tr_row['u_votes_funny'] - user_dict[tr_row['user_id']]['r_votes_funny']
+            train_set.loc[tr, 'u_votes_cool'] = tr_row['u_votes_cool'] - user_dict[tr_row['user_id']]['r_votes_cool']
+            train_set.loc[tr, 'u_votes_useful'] = tr_row['u_votes_useful'] - user_dict[tr_row['user_id']]['r_votes_useful']
 
         # update business information to exclude test reviews
         if tr_row['business_id'] in bus_dict.keys():
             new_review_total_b = tr_row['b_review_count'] - bus_dict[tr_row['business_id']]['review_count']
-            tr_row['b_stars'] = ((tr_row['b_stars'] * tr_row['b_review_count']) -
+            train_set.loc[tr, 'b_stars'] = ((tr_row['b_stars'] * tr_row['b_review_count']) -
                                  bus_dict[tr_row['business_id']]['review_stars']) / new_review_total_b
-            tr_row['b_review_count'] = new_review_total_b
+            train_set.loc[tr, 'b_review_count'] = new_review_total_b
 
     return train_set
 
