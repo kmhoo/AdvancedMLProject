@@ -13,7 +13,7 @@ incAxisLabelSpace = function(plot){
 
 
 #import training data
-training <- read.csv('yelp_training.csv')
+# training <- read.csv('../yelp_training.csv')
 
 #subset for only business columns
 business <- training[,grepl("b_|business_id", names(training))]

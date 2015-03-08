@@ -31,7 +31,7 @@ def updateColumns(df):
 
         # list of columns we want to keep in our dataset as features
         elif col in ['b_latitude', 'b_longitude', 'b_review_count', 'b_stars',
-                     'u_votes_cool', 'u_votes_funny', 'u_votes_useful', 'u_review_count', 'u_stars'] \
+                     'u_votes_cool', 'u_votes_funny', 'u_votes_useful', 'u_review_count', 'u_average_stars'] \
                 or 'b_categories_' in col:
             continue
 

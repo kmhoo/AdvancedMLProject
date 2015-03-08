@@ -37,7 +37,7 @@ def round2(X, y):
     # Set parameters
     min_score = {}
     for tree in [50, 100, 200, 500]:
-        for feature in ['auto', 'log2', 'sqrt']:
+        for feature in ['auto', 'log2']:
             model = RandomForestRegressor(n_estimators=tree, max_features=feature)
             n = len(y)
 
@@ -83,12 +83,12 @@ if __name__ == "__main__":
     r1_scores = round1(X, y)
     print r1_scores
     # No hyperparameters chosen
-    # Scores: [1.1369880333144828, 1.1306818078000924, 1.1269938727261339, 1.1344971460978877, 1.1305960630682839]
-    # Average Score: 1.1319513846
+    # Scores: [1.034907964781089, 1.0377352352079787, 1.0297716060662643, 1.0285783021199912, 1.0380972759182057]
+    # Average Score: 1.03381807682
 
     r2_scores = round2(X, y)
     print r2_scores
     # Tuning hyperparameters: number of trees, features per split
-    # Best Fit:
-    # Scores:
-    # Average Score:
+    # Best Fit: 100 trees, auto features
+    # Scores: [1.0818922781167881, 1.0870302997861752, 1.0859522148892891, 1.090698304014788, 1.0877505371306078]
+    # Average Score: 1.08666472679

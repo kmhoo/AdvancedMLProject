@@ -68,3 +68,4 @@ c4 = c4 + geom_text(x=11000, y=800, size=3,
                     label=paste("Correlation:", signif(corr, 4)))
 ggsave(c4, filename="Plots/checkinsVsReviewsScatter.png", 
        width=5, height=5, units="in")
+

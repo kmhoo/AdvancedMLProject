@@ -12,7 +12,7 @@ incAxisLabelSpace = function(plot){
 }
 
 ## Import data
-#training = read.csv("yelp_training.csv")
+training = read.csv("yelp_training.csv")
 
 training$r_date2 = strptime(as.character(training$r_date), "%Y-%m-%d")
 training$r_monthYear = as.Date(as.yearmon(training$r_date2))
@@ -64,3 +64,4 @@ t3 = t3 + xlab("Time") + ylab("Number")
 t3 = incAxisLabelSpace(t3)
 t3
 ggsave(t3, filename="Plots/revUsersOverTime.png", width=5, height=5, units="in")
+
