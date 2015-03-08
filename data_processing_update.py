@@ -43,6 +43,17 @@ def updateColumns(df):
     return df
 
 
+# function to export user info for clustering
+def clusterColumns(df):
+    for col in df.columns:
+        if col in ['user_id', 'u_votes_useful', 'u_review_count', 'u_stars_update']:
+            continue
+        # drop all other columns
+        else:
+            df.drop(col, axis=1, inplace=True)
+    df.to_csv("userClustering.csv", index=False, encoding='utf-8')
+
+
 # function to return two numpy arrays
 # one of the arrays is the features and the other is the target variable
 def numpyArrays(df):
@@ -118,7 +129,7 @@ def commonDummies(train_df, test_df):
     return train_df, test_df
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 
     # Read CSV files to pandas dataframes
     training = pd.read_csv("yelp_training.csv")
@@ -127,19 +138,28 @@ if __name__=='__main__':
     # Impute missing values with new values calculated
     training = updateMissing(training)
     test = updateMissing(test)
+    print "Updated missing data"
 
     # Redo business/user stars to avoid data leakage
     training = updateStars(training)
     test = updateStars(test)
+    print "Updated stars to avoid data leakage"
+
+    # Create a file for unique users for clustering
+    clusterColumns(training)
+    print "Exported file for user clustering"
 
     # Reduce variables, create dummies for categorical variables
     training = updateColumns(training)
     test = updateColumns(test)
-
+    print "Created categorical dummy variables"
 
     # Force test data to have same dummy variable columns as training data
     training, test = commonDummies(training, test)
+    print "Updated test data's dummy variables"
 
     # Save to new CSV
+    print "Exporting to CSV"
     training.to_csv('training_2.csv', index=False, encoding='utf-8')
     test.to_csv('testing_2.csv', index=False, encoding='utf-8')
+    print "Finished."
