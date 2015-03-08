@@ -115,73 +115,61 @@ if __name__=="__main__":
     # print bReviews
 
     bReviewCounts = Counter(list(bReviews['business_id']))
-    # print len(bReviewCounts)    # 11,508
 
     # aggregate reviews by business ("document")
     businessReviewLists = bReviews.groupby('business_id')['r_text'].apply(list)
-    # print businessReviewLists['RcfkeXHjYWCpq6NyVVmGJg']
-
-    # print businessReviewLists
 
     # get count of reviews by userid
     userReviewCounts = Counter(list(reviews['user_id']))
-    # print userReviewCounts
 
-    # 3. apply weight to each user: 1/(# reviews by user)
+    # 3. calculate weights for each user: 1/(# reviews by user)
     for k, v in userReviewCounts.items():
         userReviewCounts[k] = 1/float(v)
 
-    # print userReviewCounts['fczQCSmaWF78toLEmb0Zsw']         # test case
-
-    # 1. aggregate reviews by user ("document"); each user should now have a list of their reviews
+    # aggregate reviews by user ("document"); each user should now have a list of their reviews
     userReviewLists = reviews.groupby('user_id')['r_text'].apply(list)
 
     # recast user review lists as dictionary values
     for i, v in userReviewLists.iteritems():
         userReviews[i] = v
 
-    # print "fczQCSmaWF78toLEmb0Zsw", len(userReviews["fczQCSmaWF78toLEmb0Zsw"]), userReviews["fczQCSmaWF78toLEmb0Zsw"]
-
     # create a list of "cleaned-up" strings for bigram vectorizer processing
-
     # join all the review strings together, using a ridiculous stop word (to exclude as a feature)
     for usr, rlists in userReviews.iteritems():
-        # print usr, rlists
         userReviews2[usr] = " hoobakerokamoto ".join(rlists)
-        # print userReviews2
     print "lists joined"
 
     # create a corpus of all reviews; each user's reviews is one document within the corpus
     for usr, rString in userReviews2.iteritems():
-        # userReviews2[usr] = text_preprocessing(rString)
         corpus.append(text_preprocessing(rString))
 
-    print "text_preprocessing done...?"
-    # print "fczQCSmaWF78toLEmb0Zsw", userReviews2["fczQCSmaWF78toLEmb0Zsw"]
-    # 3. calculate tf-idf for bigram/trigram features
-
+    # calculate tf for bigram/trigram features
     ngram_vectorizer = CountVectorizer(ngram_range=(2,3), token_pattern=r'\b\w+\b', min_df=1)
 
+    # create tfidf transformer object
     transformer = TfidfTransformer()
-    print "corpus: "
 
     # get counts of the bigrams across documents;
     text_features = ngram_vectorizer.fit_transform(corpus)
 
-    print "feature len: ", len(text_features)
 
-    # print text_features.todense()[:10]
+    # print text_features[:5]
 
-    print text_features[:5]
-
+    # calculate tfidf scores for the ngram features; results in sparse matrix
     tfidf = transformer.fit_transform(text_features)
-    print tfidf
+    # print tfidf
 
+    # get feature names hash table
     print ngram_vectorizer.get_feature_names()[:5]
-    print ngram_vectorizer.inverse_transform(tfidf)[:5]
-    tfidfArray = tfidf.toarray()
 
-    print len(tfidfArray)                             #  rows
-    print len(ngram_vectorizer.get_feature_names())   # 116,006 feature names
+
+    print ngram_vectorizer.inverse_transform(tfidf)[:5]
+
+    # convert tfidf scores to a dense array
+    tfidfArray = tfidf.todense()
+
+    print len(tfidfArray)
+
+    print len(ngram_vectorizer.get_feature_names())
 
 
