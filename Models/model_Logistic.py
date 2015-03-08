@@ -74,11 +74,13 @@ if __name__ == "__main__":
     training = pd.read_csv("../training_init.csv")
     X, y = numpyArrays(training)
 
+    print "Logisitic Model 5-Fold CV"
+
     r1_scores = round1(X, y)
     print r1_scores
     # No hyperparameters chosen
-    # [1.2373706156627613, 1.2458876216364412, 1.2307398889236703, 1.24012478161287, 1.2394450388579556]
-    # 1.23871358934
+    # [1.2371618833531273, 1.2379966014319237, 1.2404973856330384, 1.2475992985676922, 1.2302980429280188]
+    # 1.23871064238
 
 
     r2_scores = round2(X, y)
