@@ -95,16 +95,20 @@ def excludeTesting(train_set, test_set):
     test_users.rename(columns={'r_stars': 'review_stars'}, inplace=True)
 
     # Convert pandas data frame to dictionary (key=user_id)
-    user_dict = test_users.set_index('user_id').to_dict()
+    user_dict = test_users.set_index('user_id').T.to_dict('dict')
+    # print user_dict
 
     # Calculate number of reviews and total stars received for each business in the test data
     test_bus = test_set.groupby('business_id', as_index=False).aggregate({'review_count': np.sum,
                                                                           'r_stars': np.sum})
-    test_users.rename(columns={'r_stars': 'review_stars'}, inplace=True)
+    test_bus.rename(columns={'r_stars': 'review_stars'}, inplace=True)
 
     # Convert to dictionary (key=business_id)
-    bus_dict = test_bus.set_index('business_id').to_dict()
+    bus_dict = test_bus.set_index('business_id').T.to_dict('dict')
+    # print bus_dict
 
+    # For testing with one specific user
+    # train_set = train_set.loc[train_set.user_id=='shkOSzUcN2hjIJpyufVS9w', :]
 
     # update the training data for businesses and users
     for tr, tr_row in train_set.iterrows():
@@ -125,6 +129,8 @@ def excludeTesting(train_set, test_set):
                                  bus_dict[tr_row['business_id']]['review_stars']) / new_review_total_b
             train_set.loc[tr, 'b_review_count'] = new_review_total_b
 
+    # print "printing specific user"
+    # print train_set.loc[train_set['user_id']=='shkOSzUcN2hjIJpyufVS9w', ]
     return train_set
 
 
@@ -134,7 +140,7 @@ def shuffle(df):
     index = list(df.index)
     random.shuffle(index)
     df = df.ix[index]
-    df.reset_index()
+    df = df.reset_index()
     return df
 
 if __name__ == "__main__":
