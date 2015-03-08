@@ -56,8 +56,10 @@ checkins$b_sum_checkins[is.na(checkins$b_sum_checkins)] = 0
 reviewsPerBus = aggregate(. ~ business_id, training[,1:2], FUN=length)
 names(reviewsPerBus)[2] = "num_reviews"
 checkins = merge(checkins, reviewsPerBus)
+max(checkins$b_sum_checkins)
 
-c4 = ggplot(checkins, aes(x=b_sum_checkins, y=num_reviews))
+c4 = ggplot(checkins[checkins$b_sum_checkins<20000,], 
+            aes(x=b_sum_checkins, y=num_reviews))
 c4 = c4 + geom_point()
 c4 = c4 + ggtitle("Business Check-Ins vs. Reviews (in data set)")
 c4 = c4 + xlab("Number of Check-Ins") + ylab("Number of Reviews")
