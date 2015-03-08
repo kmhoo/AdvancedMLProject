@@ -19,22 +19,44 @@ def get_reviews(fname):
     try:
         with open(fname, "rb") as infile:
             df = pd.DataFrame.from_csv(infile, header=0, index_col=False)
-            # print len(df)
+            print "# of user reviews: ", len(df)
             # drop any review entries that are blank
-            df.dropna()
-
+            df = df.dropna()
             # remove all newline characters from each entry
             df['r_text'] = df['r_text'].str.replace('\n', ' ')
-            # print len(df)
+            print "... after dropping NAs: ", len(df)
         return df
     except:
         raise IOError
 
 
-def text_preprocessing(textIter):
+def get_b_reviews(fname):
+    """
+    get business review text from the training data set
+    :param fname: file name of data set; expecting csv
+    :return: pandas dataframe of text reviews (strings)
+    """
+    try:
+        with open(fname, "rb") as infile:
+            df = pd.DataFrame.from_csv(infile, header=0, index_col=False)
+            df = df[['business_id', 'r_text']]
+            print "# of businesses: ", len(df)
+            # drop any review entries that are blank
+            df = df.dropna()
+
+            # remove all newline characters from each entry
+            df['r_text'] = df['r_text'].str.replace('\n', ' ')
+            print "... after dropping NAs: ", len(df)
+        return df
+    except:
+        raise IOError
+
+
+
+def text_preprocessing(textString):
     """
     remove stopwords, punctuation, etc., and stem/tokenize text strings
-    :param textIter: iterable of user_id, text (e.g. list, dataframe, etc.)
+    :param textString: string of review text
     :return: list of tokens, grouped by document
     """
     stopwords = nltk.corpus.stopwords.words('english')
@@ -42,76 +64,118 @@ def text_preprocessing(textIter):
     # addstopwords = [None, 'nan', '']
     # stopwords.extend(addstopwords)
 
-    reviewsList = textIter
+    review = textString
+
+    print review
 
     # print "reviewsList: ", list(textIter)
 
-    # clean up text to remove punctuation and empty reviews
-    reviewsList[:] = [s.translate(None, string.punctuation).lower().split()
-                      if str(s) not in (None, 'nan', '') else '' for s in reviewsList]
 
-    # print "reviewsList processed: ", reviewsList
+    # clean up text to remove punctuation and empty reviews
+    reviewTokens = [review.translate(None, string.punctuation).lower().split()]
+
+    # print "reviewTokens processed: ", reviewTokens
 
     # group the list of strings together and remove stopwords
-    reviewsList[:] = list(itertools.chain(*reviewsList))
+    reviewTokens = list(itertools.chain(*reviewTokens))
 
     # print "iter-chained"
 
-    reviewsList = [word for word in reviewsList if word not in stopwords]
-    reviewsList = [word for word in reviewsList if re.search(r'[a-zA-Z]', word) is not None]
+    reviewTokens = [word for word in reviewTokens if word not in stopwords]
+
+    # print "stopwords removed: ", reviewTokens
+
+    tokens = [word for word in reviewTokens if re.search(r'[a-zA-Z]', word) is not None]
 
     # join all reviews together into one string
-    tokens = nltk.word_tokenize(" ".join(reviewsList))
+    tokens = " ".join(tokens)
 
+    # print tokens
     return tokens
 
 
 if __name__=="__main__":
     path = "text_analysis/yelp_review_text.csv"
+    train = "yelp_training.csv"
     corpus = []
     userReviews = {}
     userReviews2 = {}
 
-    reviews = get_reviews(path)
     print "starting preprocess"
+    reviews = get_reviews(path)[:1000]
+    # print reviews
+
+    # print reviews[reviews["user_id"].isin(['RcfkeXHjYWCpq6NyVVmGJg']) ]
+
+    # get business_ids and their reviews
+    bReviews = get_b_reviews(train)
+
+    # print bReviews
+
+    bReviewCounts = Counter(list(bReviews['business_id']))
+    # print len(bReviewCounts)    # 11,508
+
+    # aggregate reviews by business ("document")
+    businessReviewLists = bReviews.groupby('business_id')['r_text'].apply(list)
+    # print businessReviewLists['RcfkeXHjYWCpq6NyVVmGJg']
+
+    # print businessReviewLists
 
     # get count of reviews by userid
     userReviewCounts = Counter(list(reviews['user_id']))
-    # print len(userReviewCounts)
+    # print userReviewCounts
 
-    # print userReviewCounts['BRNVGPDi58XPDyxfxX39sg']         # test case
-    # create a list of "cleaned-up" strings for bigram vectorizer processing
+    # 3. apply weight to each user: 1/(# reviews by user)
+    for k, v in userReviewCounts.items():
+        userReviewCounts[k] = 1/float(v)
 
-    # 1. aggregate reviews by user ("document")
+    # print userReviewCounts['fczQCSmaWF78toLEmb0Zsw']         # test case
+
+    # 1. aggregate reviews by user ("document"); each user should now have a list of their reviews
     userReviewLists = reviews.groupby('user_id')['r_text'].apply(list)
 
+    # recast user review lists as dictionary values
     for i, v in userReviewLists.iteritems():
         userReviews[i] = v
 
-    print userReviews['BRNVGPDi58XPDyxfxX39sg']
+    # print "fczQCSmaWF78toLEmb0Zsw", len(userReviews["fczQCSmaWF78toLEmb0Zsw"]), userReviews["fczQCSmaWF78toLEmb0Zsw"]
 
-    # 2. combine review strings by user
+    # create a list of "cleaned-up" strings for bigram vectorizer processing
+
+    # join all the review strings together, using a ridiculous stop word (to exclude as a feature)
     for usr, rlists in userReviews.iteritems():
-        userReviews2[usr] = text_preprocessing(rlists)
+        # print usr, rlists
+        userReviews2[usr] = " hoobakerokamoto ".join(rlists)
+        # print userReviews2
+    print "lists joined"
 
-    print userReviews2['BRNVGPDi58XPDyxfxX39sg']
+    for usr, rString in userReviews2.iteritems():
+        # userReviews2[usr] = text_preprocessing(rString)
+        corpus.append(text_preprocessing(rString))
+
+    print "text_preprocessing done...?"
+    # print "fczQCSmaWF78toLEmb0Zsw", userReviews2["fczQCSmaWF78toLEmb0Zsw"]
     # 3. calculate tf-idf for bigram/trigram features
 
-    bigram_vectorizer = CountVectorizer(ngram_range=(2,3), token_pattern=r'\b\w+\b', min_df=1)
+    ngram_vectorizer = CountVectorizer(ngram_range=(2,3), token_pattern=r'\b\w+\b', min_df=1)
 
-    # 3. apply weight to each user: 1/(# reviews by user)
+    transformer = TfidfTransformer()
 
-
-    # for docString in docStrings:
-        # print " ".join(docString)
+    # create a corpus of all reviews; each user's reviews is one document within the corpus
+    # for reviewString in corpus:
         # corpus.append(" ".join(docString))
-        #
-        # transformer = TfidfTransformer()
-        #
-        # tfidf = transformer.fit_transform(X_2)
-        #
-        # print bigram_vectorizer.get_feature_names()
-        # print tfidf.toarray()
+    print "corpus: "
+    print corpus[:2]
+
+    # get counts of the bigrams across documents
+    X_2 = ngram_vectorizer.fit_transform(corpus).toarray()
+
+    print X_2[:5]
+
+    tfidf = transformer.fit_transform(X_2)
+
+    print ngram_vectorizer.get_feature_names()
+    print tfidf.toarray()
 
 
 
