@@ -62,7 +62,7 @@ def text_preprocessing(textString):
     stopwords = nltk.corpus.stopwords.words('english')
     stopwords.extend(string.punctuation)
     # addstopwords = [None, 'nan', '']
-    # stopwords.extend(addstopwords)
+    stopwords.extend(['hoobakerokamoto'])
 
     review = textString
 
@@ -102,10 +102,12 @@ if __name__=="__main__":
     userReviews2 = {}
 
     print "starting preprocess"
-    reviews = get_reviews(path)[:1000]
+    reviews = get_reviews(path)
     # print reviews
 
     # print reviews[reviews["user_id"].isin(['RcfkeXHjYWCpq6NyVVmGJg']) ]
+
+    # 41,000 users
 
     # get business_ids and their reviews
     bReviews = get_b_reviews(train)
@@ -149,6 +151,7 @@ if __name__=="__main__":
         # print userReviews2
     print "lists joined"
 
+    # create a corpus of all reviews; each user's reviews is one document within the corpus
     for usr, rString in userReviews2.iteritems():
         # userReviews2[usr] = text_preprocessing(rString)
         corpus.append(text_preprocessing(rString))
@@ -160,25 +163,25 @@ if __name__=="__main__":
     ngram_vectorizer = CountVectorizer(ngram_range=(2,3), token_pattern=r'\b\w+\b', min_df=1)
 
     transformer = TfidfTransformer()
-
-    # create a corpus of all reviews; each user's reviews is one document within the corpus
-    # for reviewString in corpus:
-        # corpus.append(" ".join(docString))
     print "corpus: "
-    print corpus[:2]
 
     # get counts of the bigrams across documents;
-    text_features = ngram_vectorizer.fit_transform(corpus).toarray()
+    text_features = ngram_vectorizer.fit_transform(corpus)
+
+    print "feature len: ", len(text_features)
+
+    # print text_features.todense()[:10]
 
     print text_features[:5]
 
     tfidf = transformer.fit_transform(text_features)
+    print tfidf
 
     print ngram_vectorizer.get_feature_names()[:5]
     print ngram_vectorizer.inverse_transform(tfidf)[:5]
-    print tfidf.toarray()[:5]
+    tfidfArray = tfidf.toarray()
 
-
-
+    print len(tfidfArray)                             #  rows
+    print len(ngram_vectorizer.get_feature_names())   # 116,006 feature names
 
 
