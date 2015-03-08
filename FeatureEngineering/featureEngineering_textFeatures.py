@@ -66,7 +66,7 @@ def text_preprocessing(textString):
 
     review = textString
 
-    print review
+    # print review
 
     # print "reviewsList: ", list(textIter)
 
@@ -167,15 +167,16 @@ if __name__=="__main__":
     print "corpus: "
     print corpus[:2]
 
-    # get counts of the bigrams across documents
-    X_2 = ngram_vectorizer.fit_transform(corpus).toarray()
+    # get counts of the bigrams across documents;
+    text_features = ngram_vectorizer.fit_transform(corpus).toarray()
 
-    print X_2[:5]
+    print text_features[:5]
 
-    tfidf = transformer.fit_transform(X_2)
+    tfidf = transformer.fit_transform(text_features)
 
-    print ngram_vectorizer.get_feature_names()
-    print tfidf.toarray()
+    print ngram_vectorizer.get_feature_names()[:5]
+    print ngram_vectorizer.inverse_transform(tfidf)[:5]
+    print tfidf.toarray()[:5]
 
 
 
