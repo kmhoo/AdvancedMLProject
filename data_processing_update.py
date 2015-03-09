@@ -54,10 +54,6 @@ def numpyArrays(df):
     # set features to X and target to y numpy arrays
     X, y = np.array(df.ix[:, features]), np.array(df.ix[:, target])
 
-    # shuffle the indices
-    indices = np.arange(y.shape[0])
-    np.random.shuffle(indices)
-    X, y = X[indices], y[indices]
     return X, y
 
 
