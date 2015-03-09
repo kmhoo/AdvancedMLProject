@@ -59,31 +59,7 @@ def CategoryDummies(df):
     return df
 
 def excludeTesting(train_set, test_set):
-    # user_dict = {}
-    # bus_dict = {}
-    # # go through the test set to get all unique users and businesses
-    # for te, te_row in test_set.iterrows():
-    #     # sum all reviews, stars, and votes in the test set by user and business
-    #     if te_row['user_id'] in user_dict.keys():
-    #         user_dict[te_row['user_id']]['review_count'] += 1
-    #         user_dict[te_row['user_id']]['review_stars'] += te_row['r_stars']
-    #         user_dict[te_row['user_id']]['r_votes_cool'] += te_row['r_votes_cool']
-    #         user_dict[te_row['user_id']]['r_votes_funny'] += te_row['r_votes_funny']
-    #         user_dict[te_row['user_id']]['r_votes_useful'] += te_row['r_votes_useful']
-    #     else:
-    #         user_dict[te_row['user_id']] = {'review_count': 1,
-    #                                         'review_stars': te_row['r_stars'],
-    #                                         'r_votes_cool': te_row['r_votes_cool'],
-    #                                         'r_votes_funny': te_row['r_votes_funny'],
-    #                                         'r_votes_useful': te_row['r_votes_useful']}
-    #     if te_row['business_id'] in bus_dict.keys():
-    #         bus_dict[te_row['business_id']]['review_count'] += 1
-    #         bus_dict[te_row['business_id']]['review_stars'] += te_row['r_stars']
-    #     else:
-    #         bus_dict[te_row['business_id']] = {'review_count': 1,
-    #                                            'review_stars': te_row['r_stars']}
 
-    # Faster computation? Using pandas aggregate functions
     # Calculate number of reviews, total stars awarded, total votes (useful, funny, cool)
     # for each user in the test set
     test_set.loc[:, 'review_count'] = 1
@@ -92,45 +68,71 @@ def excludeTesting(train_set, test_set):
                                                                         'r_votes_useful': np.sum,
                                                                         'r_votes_cool': np.sum,
                                                                         'r_votes_funny': np.sum})
-    test_users.rename(columns={'r_stars': 'review_stars'}, inplace=True)
-
-    # Convert pandas data frame to dictionary (key=user_id)
-    user_dict = test_users.set_index('user_id').T.to_dict('dict')
-    # print user_dict
+    # Rename columns to distinguish from training set during merge
+    test_users.rename(columns={'review_count': 'test_u_review_count',
+                               'r_stars': 'test_u_review_stars',
+                               'r_votes_useful': 'test_u_votes_useful',
+                               'r_votes_cool': 'test_u_votes_cool',
+                               'r_votes_funny': 'test_u_votes_funny'}, inplace=True)
 
     # Calculate number of reviews and total stars received for each business in the test data
     test_bus = test_set.groupby('business_id', as_index=False).aggregate({'review_count': np.sum,
                                                                           'r_stars': np.sum})
-    test_bus.rename(columns={'r_stars': 'review_stars'}, inplace=True)
+    # Rename columns to distinguish from training set during merge
+    test_bus.rename(columns={'review_count': 'test_b_review_count',
+                             'r_stars': 'test_b_review_stars'}, inplace=True)
 
-    # Convert to dictionary (key=business_id)
-    bus_dict = test_bus.set_index('business_id').T.to_dict('dict')
-    # print bus_dict
-
+    ## Spot tests
     # For testing with one specific user
     # train_set = train_set.loc[train_set.user_id=='shkOSzUcN2hjIJpyufVS9w', :]
 
-    # update the training data for businesses and users
-    for tr, tr_row in train_set.iterrows():
-        # update user information to exclude test reviews
-        if tr_row['user_id'] in user_dict.keys():
-            new_review_total = tr_row['u_review_count'] - user_dict[tr_row['user_id']]['review_count']
-            train_set.loc[tr, 'u_average_stars'] = ((tr_row['u_average_stars'] * tr_row['u_review_count']) -
-                                         user_dict[tr_row['user_id']]['review_stars']) / new_review_total
-            train_set.loc[tr, 'u_review_count'] = new_review_total
-            train_set.loc[tr, 'u_votes_funny'] = tr_row['u_votes_funny'] - user_dict[tr_row['user_id']]['r_votes_funny']
-            train_set.loc[tr, 'u_votes_cool'] = tr_row['u_votes_cool'] - user_dict[tr_row['user_id']]['r_votes_cool']
-            train_set.loc[tr, 'u_votes_useful'] = tr_row['u_votes_useful'] - user_dict[tr_row['user_id']]['r_votes_useful']
+    # Merge aggregated test set information about users/businesses into training set
+    train_set = pd.merge(train_set, test_users, on='user_id', how='left')
+    train_set = pd.merge(train_set, test_bus, on='business_id', how='left')
 
-        # update business information to exclude test reviews
-        if tr_row['business_id'] in bus_dict.keys():
-            new_review_total_b = tr_row['b_review_count'] - bus_dict[tr_row['business_id']]['review_count']
-            train_set.loc[tr, 'b_stars'] = ((tr_row['b_stars'] * tr_row['b_review_count']) -
-                                 bus_dict[tr_row['business_id']]['review_stars']) / new_review_total_b
-            train_set.loc[tr, 'b_review_count'] = new_review_total_b
+    # Fill in the merged rows with no matches with 0s (will not be updated during computations)
+    new_col = ['test_u_review_count', 'test_u_review_stars', 'test_u_votes_useful', 'test_u_votes_cool',
+               'test_u_votes_funny', 'test_b_review_count', 'test_b_review_stars']
+    for col in new_col:
+        train_set[col].fillna(0, inplace=True)
 
+    ## Spot tests
+    # user_col = [col for col in train_set.columns if 'u_' in col]
+    # bus_col = [col for col in train_set.columns if 'b_' in col]
     # print "printing specific user"
-    # print train_set.loc[train_set['user_id']=='shkOSzUcN2hjIJpyufVS9w', ]
+    # print train_set.loc[train_set['user_id'] == 'shkOSzUcN2hjIJpyufVS9w', user_col]
+    # print "printing specific business"
+    # print train_set.loc[train_set['business_id'] == '-8wyZkzfBmCFkMwCGcR4PQ', bus_col]
+
+    ## Correct the user-level information in the training set by removing test set reviews
+    # new stars = ((average stars)*(total reviews) - (total test set stars)) / (# test set reviews)
+    train_set['u_average_stars'] = (((train_set['u_average_stars']*train_set['u_review_count']) -
+                                    train_set['test_u_review_stars']) /
+                                    (train_set['u_review_count'] - train_set['test_u_review_count']))
+    # number of training reviews = (total reviews) - (number of test reviews)
+    train_set['u_review_count'] = train_set['u_review_count'] - train_set['test_u_review_count']
+    # number of training votes = (total votes) - (number of test votes)
+    train_set['u_votes_useful'] = train_set['u_votes_useful'] - train_set['test_u_votes_useful']
+    train_set['u_votes_cool'] = train_set['u_votes_cool'] - train_set['test_u_votes_cool']
+    train_set['u_votes_funny'] = train_set['u_votes_funny'] - train_set['test_u_votes_funny']
+
+    ## Correct the business-level information in the training set by removing test set reviews
+    # new stars = ((average stars)*(total reviews) - (total test set stars)) / (# test set reviews)
+    train_set['b_stars'] = (((train_set['b_stars']*train_set['b_review_count']) - train_set['test_b_review_stars']) /
+                            (train_set['b_review_count'] - train_set['test_b_review_count']))
+    # number of training reviews = (total reviews) - (number of test reviews)
+    train_set['b_review_count'] = train_set['b_review_count'] - train_set['test_b_review_count']
+
+    # Drop test set information
+    train_set.drop(new_col, axis=1, inplace=True)
+
+    ## Spot tests
+    # print "printing specific user"
+    # print train_set.loc[train_set['user_id'] == 'shkOSzUcN2hjIJpyufVS9w', user_col]
+    # print "printing specific business"
+    # print train_set.loc[train_set['business_id'] == '-8wyZkzfBmCFkMwCGcR4PQ', bus_col]
+
+    # Return updated test set
     return train_set
 
 
@@ -191,14 +193,14 @@ if __name__ == "__main__":
     test = full_shuffle[split:]
     print "Split the data"
 
+    # remove any review information that are in the test set
+    training = excludeTesting(training, test)
+    print "Excluded any review information about test set"
+
     # create dummy variables for business categories
     training = CategoryDummies(training)
     test = CategoryDummies(test)
     print "Created category dummies"
-
-    # remove any review information that are in the test set
-    training = excludeTesting(training, test)
-    print "Excluded any review information about test set"
 
     print "Exporting to CSV"
     # export to csv
