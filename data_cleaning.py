@@ -207,7 +207,9 @@ if __name__ == "__main__":
     training.to_csv('yelp_training.csv', index=False, encoding='utf-8')
     test.to_csv('yelp_test.csv', index=False, encoding='utf-8')
 
-    # get just the reviews text from training data
-    text = training.loc[:, ['user_id', 'r_text']]
-    text.to_csv('yelp_review_text.csv', index=False, encoding='utf-8')
+    # get just the reviews text from training  and test data
+    text_train = training.loc[:, ['user_id', 'r_text']]
+    text_test = test.loc[:, ['user_id', 'r_text']]
+    text_train.to_csv('yelp_review_text.csv', index=False, encoding='utf-8')
+    text_test.to_csv('yelp_review_text_test.csv', index=False, encoding='utf-8')
     print "Finished"
