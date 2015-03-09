@@ -13,7 +13,7 @@ incAxisLabelSpace = function(plot){
 
 
 #import training data
-# training <- read.csv('../yelp_training.csv')
+training <- read.csv('../yelp_training.csv')
 
 #subset for only business columns
 business <- training[,grepl("b_|business_id", names(training))]
@@ -27,7 +27,7 @@ b1 <- b1 + ggtitle("Number of Reviews Per Business")
 b1 <- b1 + xlab("Number of Reviews") + ylab("Density")
 b1 <- incAxisLabelSpace(b1)
 b1
-ggsave(b1, filename="Plots/businessTrainReviewCount.png", width=7, height=5, units="in")
+ggsave(b1, filename="Plots/businessTrainReviewCount.png", width=5, height=5, units="in")
 
 # calculate median and mean
 medRev <- median(reviewsPerBus$num_of_reviews)
@@ -54,7 +54,7 @@ b3 <- b3 + ggtitle("Number Reviews per Business")
 b3 <- b3 + xlab("Number of Reviews") + ylab("Number of Businesses")
 b3 <- incAxisLabelSpace(b3)
 b3
-ggsave(b3, filename="Plots/businessReviewCount.png", width=7, height=5, units="in")
+ggsave(b3, filename="Plots/businessReviewCount.png", width=5, height=5, units="in")
 
 # number of stars by business
 b4 <- ggplot(uniqueBusiness, aes(x=b_stars))
@@ -64,7 +64,7 @@ b4 <- b4 + ggtitle("Number Businesses per Star Rating")
 b4 <- b4 + xlab("Star Ratings") + ylab("Number of Businesses")
 b4 <- incAxisLabelSpace(b4)
 b4
-ggsave(b4, filename="Plots/businessStarRatings.png", width=7, height=5, units="in")
+ggsave(b4, filename="Plots/businessStarRatings.png", width=5, height=5, units="in")
 
 # density plot of stars
 b5 <- ggplot(uniqueBusiness, aes(x=b_stars))
@@ -238,3 +238,4 @@ b17 = b17 + xlab("Average Stars Across All Reviews")
 b17 = b17 + ylab("Average Stars for Reviews in Data Set")
 b17 = incAxisLabelSpace(b17)
 ggsave(b17, filename="Plots/busAvgStarsScatter.png", width=5, height=5, units="in")
+
