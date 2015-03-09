@@ -31,7 +31,7 @@ def updateColumns(df):
             df[col] = df[col].astype(int)
 
         # list of columns we want to keep in our dataset as features
-        elif col in ['b_latitude', 'b_longitude', 'b_review_count', 'b_stars_update'
+        elif col in ['user_id', 'b_latitude', 'b_longitude', 'b_review_count', 'b_stars_update'
                      'u_votes_cool', 'u_votes_funny', 'u_votes_useful', 'u_review_count', 'u_stars_update'] \
                 or 'b_categories_' in col:
             continue
@@ -41,17 +41,6 @@ def updateColumns(df):
             df.drop(col, axis=1, inplace=True)
 
     return df
-
-
-# function to export user info for clustering
-def clusterColumns(df):
-    for col in df.columns:
-        if col in ['user_id', 'u_votes_useful', 'u_review_count', 'u_stars_update']:
-            continue
-        # drop all other columns
-        else:
-            df.drop(col, axis=1, inplace=True)
-    df.to_csv("userClustering.csv", index=False, encoding='utf-8')
 
 
 # function to return two numpy arrays
@@ -144,10 +133,6 @@ if __name__ == '__main__':
     training = updateStars(training)
     test = updateStars(test)
     print "Updated stars to avoid data leakage"
-
-    # Create a file for unique users for clustering
-    clusterColumns(training)
-    print "Exported file for user clustering"
 
     # Reduce variables, create dummies for categorical variables
     training = updateColumns(training)
