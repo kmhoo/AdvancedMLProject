@@ -143,15 +143,21 @@ if __name__=="__main__":
     for usr, rString in userReviews2.iteritems():
         corpus.append(text_preprocessing(rString))
 
-    # calculate tf for bigram/trigram features
-    ngram_vectorizer = CountVectorizer(ngram_range=(2,3), token_pattern=r'\b\w+\b', min_df=1)
+    print "corpus created"
+
+    # calculate tf for bigram/trigram features; set minimum document frequency to 5
+    ngram_vectorizer = CountVectorizer(ngram_range=(2,3), token_pattern=r'\b\w+\b', min_df=5)
+
 
     # create tfidf transformer object
     transformer = TfidfTransformer()
 
     # get counts of the bigrams across documents;
+    print "fitting/vectorizing ngram features (this may take awhile)"
     text_features = ngram_vectorizer.fit_transform(corpus)
 
+
+    print "non-zero elements: ", text_features.getnnz
 
     # print text_features[:5]
 
@@ -162,14 +168,14 @@ if __name__=="__main__":
     # get feature names hash table
     print ngram_vectorizer.get_feature_names()[:5]
 
-
+    # this produces a list of features with non-zero values for a given user
     print ngram_vectorizer.inverse_transform(tfidf)[:5]
 
     # convert tfidf scores to a dense array
     tfidfArray = tfidf.todense()
 
-    print len(tfidfArray)
+    print len(tfidfArray)                            # 41,131
 
-    print len(ngram_vectorizer.get_feature_names())
+    print len(ngram_vectorizer.get_feature_names())  # 432,376
 
 
