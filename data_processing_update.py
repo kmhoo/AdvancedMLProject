@@ -82,7 +82,9 @@ def updateStars(df):
 
 # Function to impute missing values with the column mean
 def roughImpute(df):
-    df = df.fillna(df.mean())
+    for col in df.columns:
+        print col
+        df[col].fillna(df.mean(), inplace=True)
     return df
 
 
