@@ -8,7 +8,7 @@ data <- read.csv('training_init.csv')
 n_net <- nnet(target ~ ., data=data, size=1)
 #cannot do more that size=1 because there are too many weights
 # RESULTS
-# initial  value 2473888.976275 
+# initial  value 2172771.068966  
 # final  value 1680836.000000 
 # converged
 
