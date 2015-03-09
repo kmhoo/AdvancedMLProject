@@ -69,8 +69,7 @@ def updateMissing(df):
                 df.loc[i, 'u_votes_cool'] = missing[row['user_id']]['u_votes_cool']
                 df.loc[i, 'u_votes_funny'] = missing[row['user_id']]['u_votes_funny']
                 df.loc[i, 'u_votes_useful'] = missing[row['user_id']]['u_votes_useful']
-            else:
-                df.fillna(df.mean())
+
     return df
 
 
@@ -79,6 +78,11 @@ def updateMissing(df):
 def updateStars(df):
     df['b_stars_update'] = ((df['b_stars'] * df['b_review_count']) - df['r_stars']) / (df['b_review_count'] - 1)
     df['u_stars_update'] = ((df['u_average_stars'] * df['u_review_count']) - df['r_stars']) / (df['u_review_count'] - 1)
+    return df
+
+# Function to impute missing values with the column mean
+def roughImpute(df):
+    df = df.fillna(df.mean())
     return df
 
 
@@ -134,6 +138,11 @@ if __name__ == '__main__':
     training = updateColumns(training)
     test = updateColumns(test)
     print "Created categorical dummy variables"
+
+    # Impute missing values with column mean
+    training = roughImpute(training)
+    test = roughImpute(test)
+    print "Filled in NAs"
 
     # Force test data to have same dummy variable columns as training data
     training, test = commonDummies(training, test)

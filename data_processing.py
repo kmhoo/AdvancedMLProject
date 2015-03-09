@@ -107,14 +107,19 @@ if __name__=='__main__':
     # Reduce variables, create dummies for categorical variables
     training = updateColumns(training)
     test = updateColumns(test)
+    print "Created categorical dummy variables"
 
     # Impute missing values with column mean
     training = roughImpute(training)
     test = roughImpute(test)
+    print "Filled in NAs"
 
     # Force test data to have same dummy variable columns as training data
     training, test = commonDummies(training, test)
+    print "Updated test data's dummy variables"
 
     # Save to new CSV
+    print "Exporting to CSV"
     training.to_csv('training_init.csv', index=False, encoding='utf-8')
     test.to_csv('testing_init.csv', index=False, encoding='utf-8')
+    print "Finished."
