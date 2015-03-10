@@ -5,7 +5,7 @@ from data_processing_update import numpyArrays
 from featureEngineering_CategoryReduction import reduceCategories
 from featureEngineering_userClustering import userCluster
 from featureEngineering_textFeatures import ngram_processing
-# from featureEngineering_CollaborativeFiltering import filtering
+from featureEngineering_CollaborativeFiltering import addRecommendationScores
 
 def applyFeatures(training_data, test_data, features_list):
 
@@ -24,8 +24,8 @@ def applyFeatures(training_data, test_data, features_list):
         training_data, test_data = ngram_processing(training_data, test_data)
         # print "Added Text Features"
 
-    # if "Collaborative Filtering" in features_list:
-    #     training_data, test_data = filtering(training_data, test_data)
-    #     print "Added Collaborative Filtering"
+    if "Collaborative Filtering" in features_list:
+        training_data, test_data = addRecommendationScores(training_data, test_data)
+        print "Added Collaborative Filtering"
 
     return training_data, test_data
