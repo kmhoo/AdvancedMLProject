@@ -31,9 +31,9 @@ def updateColumns(df):
             df[col] = df[col].astype(int)
 
         # list of columns we want to keep in our dataset as features
-        elif col in ['user_id', 'b_latitude', 'b_longitude', 'b_review_count', 'b_stars_update'
-                     'u_votes_cool', 'u_votes_funny', 'u_votes_useful', 'u_review_count', 'u_stars_update'] \
-                or 'b_categories_' in col:
+        elif col in ['user_id', 'business_id', 'b_latitude', 'b_longitude', 'b_review_count_update',
+                     'b_stars_update', 'u_votes_cool_update', 'u_votes_funny_update', 'u_votes_useful_update',
+                     'u_review_count_update', 'u_stars_update'] or 'b_categories_' in col:
             continue
 
         # drop all other columns
@@ -74,17 +74,28 @@ def updateMissing(df):
 
 
 # function to create new columns that exclude the review star rating in the
-# business and user average stars
-def updateStars(df):
+# business and user average stars, the review count and the votes count
+def updateReviews(df):
+    # update stars to exclude current review star
     df['b_stars_update'] = ((df['b_stars'] * df['b_review_count']) - df['r_stars']) / (df['b_review_count'] - 1)
     df['u_stars_update'] = ((df['u_average_stars'] * df['u_review_count']) - df['r_stars']) / (df['u_review_count'] - 1)
+
+    # remove review from count
+    df['b_review_count_update'] = df['b_review_count'] - 1
+    df['u_review_count_update'] = df['u_review_count'] - 1
+
+    # remove votes from counts
+    df['u_votes_cool_update'] = df['u_votes_cool'] - df['r_votes_cool']
+    df['u_votes_funny_update'] = df['u_votes_funny'] - df['r_votes_funny']
+    df['u_votes_useful_update'] = df['u_votes_useful'] - df['r_votes_useful']
+
+    user_mean = np.mean(df[np.isfinite(df['u_stars_update'])]['u_stars_update'])
+    df.fillna(user_mean, inplace=True)
     return df
 
 # Function to impute missing values with the column mean
 def roughImpute(df):
-    for col in df.columns:
-        print col
-        df[col].fillna(df.mean(), inplace=True)
+    df.fillna(df.mean(), inplace=True)
     return df
 
 
@@ -131,10 +142,10 @@ if __name__ == '__main__':
     test = updateMissing(test)
     print "Updated missing data"
 
-    # Redo business/user stars to avoid data leakage
-    training = updateStars(training)
-    test = updateStars(test)
-    print "Updated stars to avoid data leakage"
+    # Redo business/user votes, counts, and stars to avoid data leakage
+    training = updateReviews(training)
+    test = updateReviews(test)
+    print "Updated to avoid data leakage"
 
     # Reduce variables, create dummies for categorical variables
     training = updateColumns(training)

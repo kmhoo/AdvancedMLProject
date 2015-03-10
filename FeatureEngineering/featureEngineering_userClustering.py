@@ -20,12 +20,12 @@ def userCluster(train, test, users):
     users_train = pd.DataFrame(train)
     users_test = pd.DataFrame(test)
 
-    # add users back into traning set
+    # add users back into training set
     users_train['user_id'] = users
 
     # subset to only the user review information
-    users_train = users_train.loc[:, ['user_id', 'u_votes_useful', 'u_review_count', 'u_stars_update']]
-    users_test = users_test.loc[:, ['u_votes_useful', 'u_review_count', 'u_stars_update']]
+    users_train = users_train.loc[:, ['user_id', 'u_votes_useful_update', 'u_review_count_update', 'u_stars_update']]
+    users_test = users_test.loc[:, ['u_votes_useful_update', 'u_review_count_update', 'u_stars_update']]
 
     # remove all duplicates and na values
     unique_users = users_train.drop_duplicates()
