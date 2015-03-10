@@ -1,13 +1,13 @@
 __author__ = 'jrbaker'
-"""featureEngineering_textFeatures.py - script to generate n-gram features for user rating predictions
+"""
+featureEngineering_textFeatures.py - script to generate n-gram features for user rating predictions
+'ngram_processing' is the main function that generates ngram features for the training data
 """
 
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 import nltk, string, csv, itertools, re
 import pandas as pd
 import numpy as np
-from nltk.stem import wordnet
-from nltk.tokenize import RegexpTokenizer, punkt, WordPunctTokenizer
 from collections import Counter, OrderedDict
 
 def get_reviews(fname):
@@ -73,7 +73,7 @@ def text_preprocessing(textString):
     # clear stopwords
     reviewTokens = [word for word in reviewTokens if word not in stopwords]
 
-    # exclude words with numerics
+    # exclude words that are only numerics
     tokens = [word for word in reviewTokens if re.search(r'[a-zA-Z]', word) is not None]
 
     # join all reviews together into one string
@@ -83,16 +83,24 @@ def text_preprocessing(textString):
     return tokens
 
 
-def ngram_processing(userIDs, corpus, test_data=False):
+def ngram_processing(trainText, testText):
     """
     Function to create array of data for processing in an algorithm.
-    :param test_data: flag to indicate if the incoming data set is training or testing data;
-                      if test_data=True, then we only keep the ngram columns that exist in
-                      training, and exclude the rest
-    :return: numpy array of data; rows=users, columns=ngram features
+    :param userIDs: list of users, ordered alphabetically (per 'sorted' corpus df)
+    :param corpus: list of reviews by each user
+    :param userReviewCounts: dictionary of {user_id : inverse review frequency} to weigh frequent reviewers less
+    :return: pandas dataframe, where rows=users, columns=ngram features
     """
     dataSet = []
-    userIDlist = userIDs
+
+    print "Starting text feature extraction "
+
+    # process review data from training data
+    reviews = get_reviews(trainText)
+    userIDlist, corpus, userReviewCounts = create_corpus(reviews)
+
+    testReviews = get_reviews(testText)
+    testUsrIDlist, testCorpus, testUsrRevCounts = create_corpus(testReviews)
 
     # create tfidf transformer object
     transformer = TfidfTransformer()
@@ -104,9 +112,15 @@ def ngram_processing(userIDs, corpus, test_data=False):
     print "fitting/vectorizing ngram features (this may take awhile)"
     text_features = ngram_vectorizer.fit_transform(corpus).toarray()
 
-    print len(text_features)
+    # get feature names and their indices via 'vocabulary_'; result is a dictionary
+    feature_names = ngram_vectorizer.get_feature_names()
+    # print feature_names
 
-    print text_features[-5]
+    # get vectorized features from the test data set
+    print "Vectorizing test reviews"
+    testNgram_vectors = CountVectorizer(token_pattern=r'\b\w+\b', vocabulary=ngram_vectorizer.vocabulary_)
+
+    testNgram_features = testNgram_vectors.fit_transform(testCorpus).toarray()
 
     # calculate tfidf scores for the ngram features; results in sparse matrix
     tfidf = transformer.fit_transform(text_features).toarray()
@@ -122,19 +136,25 @@ def ngram_processing(userIDs, corpus, test_data=False):
     dataSet = np.array(dataSet)
 
     # print dataSet[:5]
+
+
     return dataSet
 
-def create_corpus(df):
+
+def create_corpus(reviews):
     """
     Function that takes in a dataframe or array of data and collapses the reviews into single strings by user_id
     :param df: data frame of user_ids and reviews
     :return:
     """
     corpus = []
+    userIDlist = []
     userReviews = OrderedDict()
     userReviews2 = OrderedDict()
-    userIDlist = []
-    reviewWeights = []
+
+    print "Starting corpus generation"
+    # get count of reviews by userid
+    userReviewCounts = Counter(list(reviews['user_id']))
 
     # calculate weights for each user: 1/(# reviews by user)
     for k, v in userReviewCounts.items():
@@ -147,41 +167,42 @@ def create_corpus(df):
     for usr, rlist in userReviewLists.iteritems():
         userReviews[usr] = rlist
 
-    print userReviewLists[:5]
+    # print userReviewLists[:5]
     # create user_id to sparse-matrix-index hash table
 
-    # create a list of "cleaned-up" strings for bigram vectorizer processing
-    # join all the review strings together, using a ridiculous stop word (to exclude as a feature)
+    # create a list of "cleaned-up" strings for ngram vectorizer processing
+    # join all the review strings together, using a ridiculous stop word (to exclude as a feature) to signify the
+    # break between reviews (so that the last word of one review does not form a bigram with the first word of another)
     for usr, rlists in userReviews.iteritems():
         userReviews2[usr] = " hoobakerokamoto ".join(rlists)
-    print "user review lists joined"
+    print "User review lists combined"
 
     # create a corpus of all reviews; each user's reviews is one document within the corpus
     for usr, rString in userReviews2.iteritems():
         corpus.append(text_preprocessing(rString))
         userIDlist.append(usr)
 
-    print userIDlist[:5]
+    # print userIDlist[:5]
 
-    print "corpus created"
-    return userIDlist, corpus
+    print "user_id list, corpus, and user review counts generated"
+    return userIDlist, corpus, userReviewCounts
 
 
 
 if __name__=="__main__":
-    path = "text_analysis/yelp_review_text.csv"
-    train = "yelp_training.csv"
-    testData = ""
+    trainText = "yelp_review_text.csv"
+    testText = "yelp_review_text_test.csv"
+
+    trainingData = "training_2.csv"
+    testData = "test_2.csv"
 
 
-    print "starting preprocess"
-    reviews = get_reviews(path)
-    # get count of reviews by userid
-    userReviewCounts = Counter(list(reviews['user_id']))
+    trainTextFeatures = ngram_processing(trainText, testText)
+    # reviews = get_reviews(trainText)
 
     # return corpus of data
-    userIDs, corpus = create_corpus(reviews)
-    ngram_processing(userIDs, corpus)
+    # userIDs, corpus = create_corpus(reviews)
+    # ngram_processing(userIDs, corpus)
 
     ####################################
     # BUSINESS REVIEW COUNT SECTION
