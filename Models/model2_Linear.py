@@ -8,6 +8,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression
 from itertools import combinations
 from FeatureEngineering.applyNewFeatures import applyFeatures
+from data_cleaning import shuffle
 
 
 # function to convert data frame to numpy arrays
@@ -84,6 +85,8 @@ def round2(X_df, featurelist):
 if __name__ == "__main__":
     # Import the data
     training = pd.read_csv("../training_2.csv")
+    training = shuffle(training)
+    training = training[:int(.5*len(training))]
     test = pd.read_csv("../testing_2.csv")
 
     print "Linear Model 5-Fold CV"
@@ -107,8 +110,8 @@ if __name__ == "__main__":
     # print "Average Score:", np.mean(feature_scores)
 
     # Test on individual features
-    feature_eng = ['Category Reduction', 'User Clustering', 'Text Features', 'Collaborative Filtering']
-    for i in range(1, 5):
+    feature_eng = ['Category Reduction', 'User Clustering'] #, 'Text Features', 'Collaborative Filtering'
+    for i in range(1, 2): # 5
         combo = combinations(feature_eng, i)
         for com in combo:
             feature_list = list(com)

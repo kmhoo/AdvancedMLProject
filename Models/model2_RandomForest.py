@@ -8,6 +8,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
 from itertools import combinations
 from FeatureEngineering.applyNewFeatures import applyFeatures
+from data_cleaning import shuffle
 
 
 # function to convert data frame to numpy arrays
@@ -78,29 +79,37 @@ def round2(X_df, featurelist):
 
     return scores
 
+
 if __name__ == "__main__":
     # Import the data
     training = pd.read_csv("../training_2.csv")
+    training = shuffle(training)
+    training = training[:int(.5*len(training))]
     test = pd.read_csv("../testing_2.csv")
 
     print "Random Forest Model 5-Fold CV"
 
-    X_train, y_train, X_test, y_test = dfToArray(training, test)
-
-    r1_scores = round1(X_train, y_train)
-    print "No Features Added"
-    print r1_scores
-    print np.mean(r1_scores)
+    # X_train, y_train, X_test, y_test = dfToArray(training, test)
+    #
+    # r1_scores = round1(X_train, y_train)
+    # print "No Features Added"
+    # print "Scores:", r1_scores
+    # print "Average Score:", np.mean(r1_scores)
 
     # Results
-    # [0.861030105275716, 0.8763886629156924, 0.8612865947765096, 0.86778462553430558, 0.86877258317565187]
-    # 0.867052514336
+    # Scores: [0.861030105275716, 0.8763886629156924, 0.8612865947765096, 0.86778462553430558, 0.86877258317565187]
+    # Average Score: 0.867052514336
 
     ### TEST MODEL WITH DIFFERENT FEATURES
 
+    # feature = ['User Clustering']
+    # feature_scores = round2(training, feature)
+    # print "Scores:", feature_scores
+    # print "Average Score:", np.mean(feature_scores)
+
     # Test on individual features
-    feature_eng = ['Category Reduction', 'User Clustering', 'Text Features', 'Collaborative Filtering']
-    for i in range(1, 5):
+    feature_eng = ['Category Reduction', 'User Clustering'] # , 'Text Features', 'Collaborative Filtering'
+    for i in range(1, 2): # 5
         combo = combinations(feature_eng, i)
         for com in combo:
             feature_list = list(com)

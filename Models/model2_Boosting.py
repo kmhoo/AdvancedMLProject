@@ -8,6 +8,7 @@ from sklearn.cross_validation import KFold
 from sklearn.metrics import mean_squared_error
 from itertools import combinations
 from FeatureEngineering.applyNewFeatures import applyFeatures
+from data_cleaning import shuffle
 
 
 # function to convert data frame to numpy arrays
@@ -83,26 +84,33 @@ def round2(X_df, featurelist):
 if __name__ == "__main__":
     # Import the data
     training = pd.read_csv("../training_2.csv")
+    training = shuffle(training)
+    training = training[:int(.5*len(training))]
     test = pd.read_csv("../testing_2.csv")
 
     print "Boosting: AdaBoost Model 5-Fold CV"
 
-    X_train, y_train, X_test, y_test = dfToArray(training, test)
-
-    r1_scores = round1(X_train, y_train)
-    print "No Features Added"
-    print r1_scores
-    print np.mean(r1_scores)
+    # X_train, y_train, X_test, y_test = dfToArray(training, test)
+    #
+    # r1_scores = round1(X_train, y_train)
+    # print "No Features Added"
+    # print "Scores:", r1_scores
+    # print "Average Score:", np.mean(r1_scores)
 
     # Results
-    # [1.1261781752224438, 1.1162169948436629, 1.1138816322377432, 1.1175482276607347, 1.1176648963823799]
-    # 1.11829798527
+    # Scores: [1.1261781752224438, 1.1162169948436629, 1.1138816322377432, 1.1175482276607347, 1.1176648963823799]
+    # Average Score: 1.11829798527
 
     ### TEST MODEL WITH DIFFERENT FEATURES
 
+    # feature = ['User Clustering']
+    # feature_scores = round2(training, feature)
+    # print "Scores:", feature_scores
+    # print "Average Score:", np.mean(feature_scores)
+
     # Test on individual features
-    feature_eng = ['Category Reduction', 'User Clustering', 'Text Features', 'Collaborative Filtering']
-    for i in range(1, 5):
+    feature_eng = ['Category Reduction', 'User Clustering'] # , 'Text Features', 'Collaborative Filtering'
+    for i in range(1, 2): # 5
         combo = combinations(feature_eng, i)
         for com in combo:
             feature_list = list(com)
