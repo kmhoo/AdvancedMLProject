@@ -9,10 +9,6 @@ from featureEngineering_CollaborativeFiltering import filtering
 
 def applyFeatures(training_data, test_data, features_list):
 
-    # Create numpy arrays
-    # X_train, y_train = numpyArrays(training_data)
-    # X_test, y_test = numpyArrays(test_data)
-
     if "Category Reduction" in features_list:
         # Reduce business categories using PCA
         category_col_indices = [col for col in training_data.columns if 'b_categories_' in col]
