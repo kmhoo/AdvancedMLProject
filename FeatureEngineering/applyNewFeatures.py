@@ -15,7 +15,7 @@ def applyFeatures(training_data, test_data, features_list):
 
     if "Category Reduction" in features_list:
         # Reduce business categories using PCA
-        category_col_indices = [idx for idx, col in enumerate(training_data.columns) if 'b_categories_' in col]
+        category_col_indices = [col for col in training_data.columns if 'b_categories_' in col]
         training_data, X_test = reduceCategories(training_data, test_data, category_col_indices)
         print "Added Category Reduction"
 
