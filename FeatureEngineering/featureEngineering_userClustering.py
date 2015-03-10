@@ -39,6 +39,11 @@ def userCluster(train, test):
     # add clusters into original data
     train_update_df = pd.merge(train, unique_users, on='user_id', how='left')
 
+    clusters_df = pd.get_dummies(train_update_df['cluster_labels'], prefix='cluster')
+    clusters_df.drop('cluster_0', axis=1, inplace=True)
+    train_update_df = pd.concat([train_update_df, clusters_df], axis=1)
+    train_update_df.drop('cluster_labels', axis=1, inplace=True)
+
     # subset to only review information
     users_test = test.loc[:, ['u_votes_useful_update', 'u_review_count_update', 'u_stars_update']]
 
@@ -47,5 +52,11 @@ def userCluster(train, test):
 
     test_update_df = test
     test_update_df['cluster_labels'] = model.predict(test_feature_scale)
+
+    # create dummy variables for clusters
+    test_clusters_df = pd.get_dummies(test_update_df['cluster_labels'], prefix='cluster')
+    test_clusters_df.drop('cluster_0', axis=1, inplace=True)
+    test_update_df = pd.concat([test_update_df, test_clusters_df], axis=1)
+    test_update_df.drop('cluster_labels', axis=1, inplace=True)
 
     return train_update_df, test_update_df

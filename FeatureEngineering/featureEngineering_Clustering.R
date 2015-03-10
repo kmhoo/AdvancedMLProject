@@ -58,10 +58,10 @@ ggsave(k, filename="FeatureEngineering/UserKMeansScreePlotInit.png", width=7, he
 training2 <- read.csv("training_2.csv")
 
 #subset for correct columns
-users <- training[, c('user_id', 'u_votes_useful', 'u_review_count', 'u_stars_update')]
+users2 <- training2[, c('user_id', 'u_votes_useful_update', 'u_review_count_update', 'u_stars_update')]
 
 #get unique users with no missing data
-user_unique2 <- training2[!duplicated(training2$user_id),]
+user_unique2 <- users2[!duplicated(users2$user_id),]
 user_unique2 <- user_unique2[!is.na(user_unique2$u_votes_useful),]
 
 #Scale the columns
@@ -86,7 +86,6 @@ k2 <- k2 + xlab("Number of Clusters") + ylab("Within Groups Sum of Squares")
 k2 <- incAxisLabelSpace(k2)
 k2
 ggsave(k2, filename="FeatureEngineering/UserKMeansScreePlot2.png", width=7, height=5, units="in")
-
 
 # #Calculating our kmeans using second process for 5 clusters
 # final_cluster <- kmeans(users_scaled, centers=5, iter.max=50)$cluster
