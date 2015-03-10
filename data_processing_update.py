@@ -89,9 +89,7 @@ def updateReviews(df):
     df['u_votes_funny_update'] = df['u_votes_funny'] - df['r_votes_funny']
     df['u_votes_useful_update'] = df['u_votes_useful'] - df['r_votes_useful']
 
-    df.replace(np.inf, np.nan, inplace=True)
-    user_mean = np.mean(df[np.isfinite(df['u_stars_update'])]['u_stars_update'])
-    df.fillna(user_mean, inplace=True)
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
     return df
 
 # Function to impute missing values with the column mean
