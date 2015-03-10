@@ -3,11 +3,7 @@ __author__ = 'griffin'
 import pandas as pd
 import numpy as np
 import random
-from scipy.spatial.distance import pdist
-from sklearn.metrics.pairwise import pairwise_distances
 from scipy.spatial.distance import *
-import operator
-from data_cleaning import shuffle
 
 
 def distance(user1_dict, user2_dict):
@@ -18,17 +14,16 @@ def distance(user1_dict, user2_dict):
     :param user2_dict: dictionary of business_id: rating pairs
     :return: numeric distance
     """
-    common_businesses = list(set(user1_dict.keys()) & set(user2_dict.keys()))
-    #print len(common_businesses)
-    ratings1 = np.asarray([user1_dict[bus_id] for bus_id in common_businesses])
-    ratings2 = np.asarray([user2_dict[bus_id] for bus_id in common_businesses])
-    return cosine(ratings1, ratings2)
+    all_businesses = list(set(user1_dict.keys()) | set(user2_dict.keys()))
+    ratings1 = np.asarray([1 if bus_id in user1_dict else 0 for bus_id in all_businesses])
+    ratings2 = np.asarray([1 if bus_id in user2_dict else 0 for bus_id in all_businesses])
+    return jaccard(ratings1, ratings2)
 
 
-def create_ratings_dictionary(ratings_df):
+def createRatingsDictionary(ratings_df):
     """
     Create a dictionary of the form {user_id: {business_id: rating}} from a pandas
-    data frame containing the columns user_id, business_id, rating
+    data frame containing (at least) the columns user_id, business_id, rating
     :param ratings_df: Pandas dataframe
     :return: dictionary of structure specified above
     """
@@ -49,7 +44,7 @@ def create_ratings_dictionary(ratings_df):
     return ratings_dict
 
 
-def recommendation_scores(ratings_dict_train, ratings_dict_test):
+def recommendationScores(ratings_dict_train, ratings_dict_test):
     """
     Calculates recommendation scores for each user/business combination in the
     test set using collaborative filtering.
@@ -101,7 +96,27 @@ def recommendation_scores(ratings_dict_train, ratings_dict_test):
             rec_scores[test_user][bus_id] = rec_score
         print "\n"
 
-        return rec_scores
+    return rec_scores
+
+
+
+def addRecommendationScores(train_df, test_df):
+
+    ratings_dict_train = createRatingsDictionary(train_df)
+    ratings_dict_test = createRatingsDictionary(test_df)
+
+    rec_scores = recommendationScores(ratings_dict_train, ratings_dict_test)
+
+    train_df['rec_scores'] = np.nan
+    for idx, row in train_df.iterrows():
+        train_df.loc[idx, 'rec_scores'] = rec_scores[row['user_id']][row['business_id']]
+
+    test_df['rec_scores'] = np.nan
+    for idx, row in test_df.iterrows():
+        test_df.loc[idx, 'rec_scores'] = rec_scores[row['user_id']][row['business_id']]
+
+
+    return train_df, test_df
 
 
 if __name__ == "__main__":
@@ -109,26 +124,22 @@ if __name__ == "__main__":
     # Import the data
     data = pd.read_csv("../yelp_training.csv")
     data.drop_duplicates(['business_id', 'user_id'], inplace=True)
-    ratings = data[['business_id', 'user_id', 'r_stars']]
+    #ratings = data[['business_id', 'user_id', 'r_stars']]
 
     # Separate training, test
-    n = len(ratings.index)
+    n = len(data.index)
     n_train = int(0.8*n)
     train_indices = random.sample(xrange(n), n_train)
     test_indices = list(set(xrange(n)) - set(train_indices))
-    train = ratings.loc[train_indices, :]
-    test = ratings.loc[test_indices, :]
+    train = data.loc[train_indices, ['user_id', 'business_id', 'r_stars', 'u_review_count']]
+    test = data.loc[test_indices, ['user_id', 'business_id', 'r_stars', 'u_review_count']]
 
     # Spot tests
-    print "specific business"
-    print train.loc[train['business_id'] == "MkDHjGBxz8r1mSjQf6kOUw", ]
-    print test.loc[test['business_id'] == "MkDHjGBxz8r1mSjQf6kOUw", ]
+    # print "specific business"
+    # print train.loc[train['business_id'] == "MkDHjGBxz8r1mSjQf6kOUw", ]
+    # print test.loc[test['business_id'] == "MkDHjGBxz8r1mSjQf6kOUw", ]
+    # print "]n"
 
-    # Create dictionary from data frames
-    ratings_dict_train = create_ratings_dictionary(train)
-    ratings_dict_test = create_ratings_dictionary(test)
-
-    # Generate recommendation scores
-    rec_scores = recommendation_scores(ratings_dict_train, ratings_dict_test)
-
+    new_train, new_test = addRecommendationScores(train, test)
+    print new_train
 
