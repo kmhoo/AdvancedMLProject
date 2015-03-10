@@ -13,20 +13,17 @@ from FeatureEngineering.applyNewFeatures import applyFeatures
 # function to convert data frame to numpy arrays
 # as well as drop user_id and business_id
 def dfToArray(train_df, test_df):
-    # Strip out user_id with index
-    user_id = train_df['user_id']
-    user_id_test = test_df['user_id']
-    print "Strip users"
-
-    # Strip out business_id with index
-    bus_id = train_df['business_id']
-    bus_id_test = test_df['business_id']
-    print "Strip business"
+    # # Strip out user_id with index
+    # user_id = train_df['user_id']
+    # user_id_test = test_df['user_id']
+    #
+    # # Strip out business_id with index
+    # bus_id = train_df['business_id']
+    # bus_id_test = test_df['business_id']
 
     # Drop user_id from dataframes
     train_update = train_df.drop(['user_id', 'business_id'], axis=1)
     test_update = test_df.drop(['user_id', 'business_id'], axis=1)
-    print "Drop users and businesses"
 
     # Create numpy arrays
     X_train_array, y_train_array = numpyArrays(train_update)
@@ -64,7 +61,6 @@ def round2(X_df, featurelist):
     model = LinearRegression()
     y_df = X_df['target']
     n = len(y_df)
-    print len(y_df), len(X_df)
 
     # Perform 5-fold cross validation
     scores = []
@@ -76,14 +72,10 @@ def round2(X_df, featurelist):
         # y_train, y_test = y_df[train_idx], y_df[test_idx]
 
         X_train, X_test = applyFeatures(X_train, X_test, featurelist)
-        print "Applied feature"
         Xtrain_array, ytrain_array, Xtest_array, ytest_array = dfToArray(X_train, X_test)
-        print "Added features to arrays"
         model.fit(Xtrain_array, ytrain_array)
-        print "Fitted Model"
         prediction = model.predict(Xtest_array)
         rmse = np.sqrt(mean_squared_error(ytest_array, prediction))
-        print "Score: RMSE", rmse
         scores.append(rmse)
 
     return scores
@@ -99,8 +91,9 @@ if __name__ == "__main__":
     # X_train, y_train, X_test, y_test = dfToArray(training, test)
     #
     # r1_scores = round1(X_train, y_train)
-    # print r1_scores
-    # print np.mean(r1_scores)
+    # print "No Features Added"
+    # print "Scores:", r1_scores
+    # print "Average Score:", np.mean(r1_scores)
 
     # Results
     # [1.1191603617302905, 1.1181220272210686, 1.1122984131430593, 1.1153080096785306, 1.1137520088553388]
@@ -108,25 +101,18 @@ if __name__ == "__main__":
 
     ### TEST MODEL WITH DIFFERENT FEATURES
 
-    feature = ['User Clustering']
-    # training, test = applyFeatures(training, test, feature)
-    # print "applied feature"
-    #
-    # X_train2, y_train2, X_test2, y_test2 = dfToArray(training, test)
-    # print "converted"
-    #
-    # feature_scores = round1(X_train2, y_train2)
-    feature_scores = round2(training, feature)
-    print "Scores:", feature_scores
-    print "Average Score:", np.mean(feature_scores)
+    # feature = ['User Clustering']
+    # feature_scores = round2(training, feature)
+    # print "Scores:", feature_scores
+    # print "Average Score:", np.mean(feature_scores)
 
-    # # Test on individual features
-    # feature_eng = ['Category Reduction', 'User Clustering', 'Text Features', 'Collaborative Filtering']
-    # for i in range(1, 5):
-    #     combo = combinations(feature_eng, i)
-    #     for com in combo:
-    #         feature_list = list(com)
-    #         print feature_list
-    #         feature_scores = round2(X_train, feature_list)
-    #         print "Scores:", feature_scores
-    #         print "Average Score:", np.mean(feature_scores)
+    # Test on individual features
+    feature_eng = ['Category Reduction', 'User Clustering', 'Text Features', 'Collaborative Filtering']
+    for i in range(1, 5):
+        combo = combinations(feature_eng, i)
+        for com in combo:
+            feature_list = list(com)
+            print "Features:", feature_list
+            feature_scores = round2(training, feature_list)
+            print "Scores:", feature_scores
+            print "Average Score:", np.mean(feature_scores)

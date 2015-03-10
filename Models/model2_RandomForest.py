@@ -13,13 +13,13 @@ from FeatureEngineering.applyNewFeatures import applyFeatures
 # function to convert data frame to numpy arrays
 # as well as drop user_id and business_id
 def dfToArray(train_df, test_df):
-    # Strip out user_id with index
-    user_id = train_df['user_id']
-    user_id_test = test_df['user_id']
-
-    # Strip out business_id with index
-    bus_id = train_df['business_id']
-    bus_id_test = test_df['business_id']
+    # # Strip out user_id with index
+    # user_id = train_df['user_id']
+    # user_id_test = test_df['user_id']
+    #
+    # # Strip out business_id with index
+    # bus_id = train_df['business_id']
+    # bus_id_test = test_df['business_id']
 
     # Drop user_id from dataframes
     train_update = train_df.drop(['user_id', 'business_id'], axis=1)
@@ -71,7 +71,6 @@ def round2(X_df, featurelist):
 
         X_train, X_test = applyFeatures(X_train, X_test, featurelist)
         Xtrain_array, ytrain_array, Xtest_array, ytest_array = dfToArray(X_train, X_test)
-        print "Added features"
         model.fit(Xtrain_array, ytrain_array)
         prediction = model.predict(Xtest_array)
         rmse = np.sqrt(mean_squared_error(ytest_array, prediction))
@@ -89,6 +88,7 @@ if __name__ == "__main__":
     X_train, y_train, X_test, y_test = dfToArray(training, test)
 
     r1_scores = round1(X_train, y_train)
+    print "No Features Added"
     print r1_scores
     print np.mean(r1_scores)
 
@@ -98,13 +98,13 @@ if __name__ == "__main__":
 
     ### TEST MODEL WITH DIFFERENT FEATURES
 
-    # # Test on individual features
-    # feature_eng = ['Category Reduction', 'User Clustering', 'Text Features', 'Collaborative Filtering']
-    # for i in range(1, 5):
-    #     combo = combinations(feature_eng, i)
-    #     for com in combo:
-    #         feature_list = list(com)
-    #         print feature_list
-    #         feature_scores = round2(X_train, feature_list)
-    #         print "Scores:", feature_scores
-    #         print "Average Score:", np.mean(feature_scores)
+    # Test on individual features
+    feature_eng = ['Category Reduction', 'User Clustering', 'Text Features', 'Collaborative Filtering']
+    for i in range(1, 5):
+        combo = combinations(feature_eng, i)
+        for com in combo:
+            feature_list = list(com)
+            print "Features:", feature_list
+            feature_scores = round2(training, feature_list)
+            print "Scores:", feature_scores
+            print "Average Score:", np.mean(feature_scores)
