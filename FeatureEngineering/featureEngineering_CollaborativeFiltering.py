@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import random
 from scipy.spatial.distance import *
+import time
 
 
 def distance(user1_dict, user2_dict):
@@ -94,17 +95,20 @@ def recommendationScores(ratings_dict_train, ratings_dict_test):
             top5 = sorted(similar_users_dist, key=similar_users_dist.get, reverse=True)[0:5]
 
             # Calculate recommendation score as sum(similarity * rating) for top 5's ratings of this business
-            rec_score = np.sum([1.0/distances[user_id] * ratings_dict_train[user_id][bus_id] for user_id in top5])
+            rec_score_unscaled = np.sum([1.0/(distances[user_id]+0.1) * ratings_dict_train[user_id][bus_id] for user_id in top5])
 
             # Scale the score by the number of users who actually contributed to it
-            rec_score = rec_score/len(top5)
+            rec_score = rec_score_unscaled/len(top5)
 
             # Add to recommendation scores dictionary
             rec_scores[test_user][bus_id] = rec_score
-            if len(similar_users_dist) == 0:
+
+            # Print if there's a strange value
+            if rec_score == 0 or rec_score == np.inf:
                 print "Test User: " + str(test_user) + ", Business: " + str(bus_id)
-                print "    " + str(len(similar_users)) + " users also reviewed this business"
-                print "    Recommendation Score: " + str(rec_score)
+                print "    " + str(len(similar_users_dist)) + " users also reviewed this business"
+                print "    " + str(top5)
+                print "    Recommendation Score: " + str(rec_score_unscaled) + "/" + str(len(top5)) + '=' + str(rec_score)
                 print "\n"
 
     return rec_scores
@@ -120,47 +124,47 @@ def addRecommendationScores(train_df, test_df):
     :return: altered data frames
     """
 
-    #
+    # Convert data frames to ratings dictionaries
     ratings_dict_train = createRatingsDictionary(train_df)
     ratings_dict_test = createRatingsDictionary(test_df)
 
+    # Generate recommendation scores for training and test based on training
     rec_scores_test = recommendationScores(ratings_dict_train, ratings_dict_test)
     rec_scores_train = recommendationScores(ratings_dict_train, ratings_dict_train)
 
-    rec_scores = {}
-    for dict in (rec_scores, rec_scores_train):
-        for user, ratings in dict.iteritems():
-            if user in rec_scores:
-                rec_scores[user].update(ratings)
-            else:
-                rec_scores[user] = ratings
-
-
+    # Add recommendation scores to training data frame
     train_df['rec_scores'] = np.nan
     for idx, row in train_df.iterrows():
         try:
-            train_df.loc[idx, 'rec_scores'] = rec_scores[row['user_id']][row['business_id']]
-        except Exception as e:
+            train_df.loc[idx, 'rec_scores'] = rec_scores_train[row['user_id']][row['business_id']]
+        except KeyError, e:
             print e
             print "Could not find following record in dictionary:"
             print "User ID: " + str(row['user_id']) + ", Business ID: " + str(row['business_id'])
-            print "\n"
             test_df.loc[idx, 'rec_scores'] = np.nan
 
+    # Add recommendation scores to test data frame
     test_df['rec_scores'] = np.nan
     for idx, row in test_df.iterrows():
         try:
-            test_df.loc[idx, 'rec_scores'] = rec_scores[row['user_id']][row['business_id']]
-        except Exception as e:
+            test_df.loc[idx, 'rec_scores'] = rec_scores_test[row['user_id']][row['business_id']]
+        except KeyError, e:
+            print e
             print "Could not find following record in dictionary:"
             print "User ID: " + str(row['user_id']) + ", Business ID: " + str(row['business_id'])
-            print "\n"
             test_df.loc[idx, 'rec_scores'] = np.nan
+
+    # Impute remaining missing values with mean
+    train_rec_mean = train_df['rec_scores'].mean()
+    train_df['rec_scores'].fillna(train_rec_mean)
+    test_df['rec_scores'].fillna(train_rec_mean)
 
     return train_df, test_df
 
 
 if __name__ == "__main__":
+
+    start = time.time()
 
     # Import the data
     data = pd.read_csv("../yelp_training.csv")
@@ -168,7 +172,7 @@ if __name__ == "__main__":
     #ratings = data[['business_id', 'user_id', 'r_stars']]
 
     # Separate training, test
-    n = int(len(data.index)*0.05)
+    n = int(len(data.index)*0.01)
     n_train = int(0.8*n)
     train_indices = random.sample(xrange(n), n_train)
     test_indices = list(set(xrange(n)) - set(train_indices))
@@ -182,5 +186,6 @@ if __name__ == "__main__":
     # print "]n"
 
     new_train, new_test = addRecommendationScores(train, test)
-    print new_train
 
+    end = time.time()
+    #print "time elapsed: " + str(end-start)
