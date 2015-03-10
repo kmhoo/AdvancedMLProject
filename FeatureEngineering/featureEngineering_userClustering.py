@@ -19,9 +19,8 @@ def userCluster(train, test):
 
     # subset to only the user review information
     users_train = train.loc[:, ['user_id', 'u_votes_useful_update', 'u_review_count_update', 'u_stars_update']]
-
     # remove all duplicates and na values
-    unique_users = users_train.drop_duplicates()
+    unique_users = users_train.drop_duplicates(cols='user_id')
     unique_users = unique_users.dropna()
 
     # only need features (drop user_id)
@@ -34,6 +33,8 @@ def userCluster(train, test):
     model = KMeans(n_clusters=5)
     model.fit(feature_scaled)
     unique_users['cluster_labels'] = model.labels_
+
+    unique_users = unique_users.loc[:, ['user_id', 'cluster_labels']]
 
     # add clusters into original data
     train_update_df = pd.merge(train, unique_users, on='user_id', how='left')

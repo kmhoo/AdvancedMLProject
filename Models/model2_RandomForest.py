@@ -56,7 +56,7 @@ def round1(X, y):
 # function to apply all of the feature engineering into cross validation
 def round2(X_df, featurelist):
     # Set parameters
-    model = RandomForestRegressor()
+    model = RandomForestRegressor(max_depth=50)
     y_df = X_df['target']
     n = len(y_df)
 
