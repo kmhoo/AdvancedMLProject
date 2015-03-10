@@ -60,7 +60,7 @@ def recommendationScores(ratings_dict_train, ratings_dict_test):
     # For every user/business combo in the test set,
     # calculate recommendation score based on top 5 most similar users
     for test_user, test_ratings in ratings_dict_test.iteritems():
-        print test_user, test_ratings
+        #print test_user, test_ratings
 
         # Initialize dictionary to hold distances between current test user and all training users
         distances = {}
@@ -74,7 +74,7 @@ def recommendationScores(ratings_dict_train, ratings_dict_test):
             if train_user == test_user:
                 continue
             # Do not consider users who haven't reviewed any of the same businesses
-            elif len(list(set(test_ratings.keys()) & set(train_ratings.keys()))) == 0:
+            elif len(set(test_ratings.keys()) & set(train_ratings.keys())) == 0:
                 continue
             # Calculate distance based on common business ratings
             else:
@@ -82,39 +82,80 @@ def recommendationScores(ratings_dict_train, ratings_dict_test):
 
         # For each business for the current user, calculate recommendation score
         for bus_id in test_ratings.iterkeys():
-            print "Test User: " + str(test_user) + ", Business: " + str(bus_id)
+
             # First narrow down similar users based on who has also reviewed the current question
             similar_users = [user_id for user_id, ratings in ratings_dict_train.iteritems() if bus_id in ratings]
-            print "    " + str(len(similar_users)) + " users also reviewed this business"
+
             # Subset distance dictionary created in previous step to only hold these users
-            similar_users_dist = {user_id: distances[user_id] for user_id in similar_users}
+            similar_users_dist = {user_id: distances[user_id] for user_id in similar_users if user_id in distances}
+
             # Sort these users by distance to take the most similar 5
+            # The "top 5" will have less than 5 if fewer than 5 other users have reviewed the business
             top5 = sorted(similar_users_dist, key=similar_users_dist.get, reverse=True)[0:5]
+
             # Calculate recommendation score as sum(similarity * rating) for top 5's ratings of this business
             rec_score = np.sum([1.0/distances[user_id] * ratings_dict_train[user_id][bus_id] for user_id in top5])
+
+            # Scale the score by the number of users who actually contributed to it
+            rec_score = rec_score/len(top5)
+
             # Add to recommendation scores dictionary
             rec_scores[test_user][bus_id] = rec_score
-        print "\n"
+            if len(similar_users_dist) == 0:
+                print "Test User: " + str(test_user) + ", Business: " + str(bus_id)
+                print "    " + str(len(similar_users)) + " users also reviewed this business"
+                print "    Recommendation Score: " + str(rec_score)
+                print "\n"
 
     return rec_scores
 
 
 
 def addRecommendationScores(train_df, test_df):
+    """
+    Function to execute collaborative filtering and append resulting
+    recommendation scores to the training and test data frames
+    :param train_df: Pandas data frame
+    :param test_df: Pandas data frame
+    :return: altered data frames
+    """
 
+    #
     ratings_dict_train = createRatingsDictionary(train_df)
     ratings_dict_test = createRatingsDictionary(test_df)
 
-    rec_scores = recommendationScores(ratings_dict_train, ratings_dict_test)
+    rec_scores_test = recommendationScores(ratings_dict_train, ratings_dict_test)
+    rec_scores_train = recommendationScores(ratings_dict_train, ratings_dict_train)
+
+    rec_scores = {}
+    for dict in (rec_scores, rec_scores_train):
+        for user, ratings in dict.iteritems():
+            if user in rec_scores:
+                rec_scores[user].update(ratings)
+            else:
+                rec_scores[user] = ratings
+
 
     train_df['rec_scores'] = np.nan
     for idx, row in train_df.iterrows():
-        train_df.loc[idx, 'rec_scores'] = rec_scores[row['user_id']][row['business_id']]
+        try:
+            train_df.loc[idx, 'rec_scores'] = rec_scores[row['user_id']][row['business_id']]
+        except Exception as e:
+            print e
+            print "Could not find following record in dictionary:"
+            print "User ID: " + str(row['user_id']) + ", Business ID: " + str(row['business_id'])
+            print "\n"
+            test_df.loc[idx, 'rec_scores'] = np.nan
 
     test_df['rec_scores'] = np.nan
     for idx, row in test_df.iterrows():
-        test_df.loc[idx, 'rec_scores'] = rec_scores[row['user_id']][row['business_id']]
-
+        try:
+            test_df.loc[idx, 'rec_scores'] = rec_scores[row['user_id']][row['business_id']]
+        except Exception as e:
+            print "Could not find following record in dictionary:"
+            print "User ID: " + str(row['user_id']) + ", Business ID: " + str(row['business_id'])
+            print "\n"
+            test_df.loc[idx, 'rec_scores'] = np.nan
 
     return train_df, test_df
 
@@ -127,7 +168,7 @@ if __name__ == "__main__":
     #ratings = data[['business_id', 'user_id', 'r_stars']]
 
     # Separate training, test
-    n = len(data.index)
+    n = int(len(data.index)*0.05)
     n_train = int(0.8*n)
     train_indices = random.sample(xrange(n), n_train)
     test_indices = list(set(xrange(n)) - set(train_indices))
