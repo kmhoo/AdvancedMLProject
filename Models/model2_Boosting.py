@@ -2,7 +2,7 @@ __author__ = 'kaileyhoo'
 
 import numpy as np
 import pandas as pd
-from data_processing import numpyArrays
+from data_processing_update import numpyArrays
 from sklearn.ensemble import AdaBoostRegressor
 from sklearn.cross_validation import KFold
 from sklearn.metrics import mean_squared_error
@@ -58,7 +58,7 @@ def round1(X, y):
 def round2(X_df, featurelist):
     # Set parameters
     model = AdaBoostRegressor()
-    y_df = X_df['r_stars']
+    y_df = X_df['target']
     n = len(y_df)
 
     # Perform 5-fold cross validation
@@ -67,7 +67,7 @@ def round2(X_df, featurelist):
 
     # Calculate mean absolute deviation for train/test for each fold
     for train_idx, test_idx in kf:
-        X_train, X_test = X_df[train_idx], X_df[test_idx]
+        X_train, X_test = X_df.iloc[train_idx, :], X_df.iloc[test_idx, :]
         # y_train, y_test = y_df[train_idx], y_df[test_idx]
 
         X_train, X_test = applyFeatures(X_train, X_test, featurelist)
