@@ -2,7 +2,7 @@ __author__ = 'kaileyhoo'
 
 import numpy as np
 import pandas as pd
-from data_processing import numpyArrays
+from data_processing_update import numpyArrays
 from sklearn.cross_validation import KFold
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression
@@ -16,14 +16,17 @@ def dfToArray(train_df, test_df):
     # Strip out user_id with index
     user_id = train_df['user_id']
     user_id_test = test_df['user_id']
+    print "Strip users"
 
     # Strip out business_id with index
     bus_id = train_df['business_id']
     bus_id_test = test_df['business_id']
+    print "Strip business"
 
     # Drop user_id from dataframes
     train_update = train_df.drop(['user_id', 'business_id'], axis=1)
     test_update = test_df.drop(['user_id', 'business_id'], axis=1)
+    print "Drop users and businesses"
 
     # Create numpy arrays
     X_train_array, y_train_array = numpyArrays(train_update)
@@ -59,8 +62,9 @@ def round1(X, y):
 def round2(X_df, featurelist):
     # Set parameters
     model = LinearRegression()
-    y_df = X_df['r_stars']
+    y_df = X_df['target']
     n = len(y_df)
+    print len(y_df), len(X_df)
 
     # Perform 5-fold cross validation
     scores = []
@@ -68,15 +72,18 @@ def round2(X_df, featurelist):
 
     # Calculate mean absolute deviation for train/test for each fold
     for train_idx, test_idx in kf:
-        X_train, X_test = X_df[train_idx], X_df[test_idx]
+        X_train, X_test = X_df.iloc[train_idx, :], X_df.iloc[test_idx, :]
         # y_train, y_test = y_df[train_idx], y_df[test_idx]
 
         X_train, X_test = applyFeatures(X_train, X_test, featurelist)
+        print "Applied feature"
         Xtrain_array, ytrain_array, Xtest_array, ytest_array = dfToArray(X_train, X_test)
-        print "Added features"
+        print "Added features to arrays"
         model.fit(Xtrain_array, ytrain_array)
+        print "Fitted Model"
         prediction = model.predict(Xtest_array)
         rmse = np.sqrt(mean_squared_error(ytest_array, prediction))
+        print "Score: RMSE", rmse
         scores.append(rmse)
 
     return scores
@@ -102,13 +109,14 @@ if __name__ == "__main__":
     ### TEST MODEL WITH DIFFERENT FEATURES
 
     feature = ['User Clustering']
-    training, test = applyFeatures(training, test, feature)
-    print "applied feature"
-
-    X_train2, y_train2, X_test2, y_test2 = dfToArray(training, test)
-    print "converted"
-
-    feature_scores = round1(X_train2, y_train2)
+    # training, test = applyFeatures(training, test, feature)
+    # print "applied feature"
+    #
+    # X_train2, y_train2, X_test2, y_test2 = dfToArray(training, test)
+    # print "converted"
+    #
+    # feature_scores = round1(X_train2, y_train2)
+    feature_scores = round2(training, feature)
     print "Scores:", feature_scores
     print "Average Score:", np.mean(feature_scores)
 
