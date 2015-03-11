@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import scale
+from data_cleaning import shuffle
 
 
 def userCluster(train, test):
@@ -20,11 +21,11 @@ def userCluster(train, test):
     # subset to only the user review information
     users_train = train.loc[:, ['user_id', 'u_votes_useful_update', 'u_review_count_update', 'u_stars_update']]
     # remove all duplicates and na values
-    unique_users = users_train.drop_duplicates(cols='user_id')
-    unique_users = unique_users.dropna()
+    # unique_users = users_train.drop_duplicates(cols='user_id')
+    # unique_users = unique_users.dropna()
 
     # only need features (drop user_id)
-    features = unique_users.loc[:, ['u_votes_useful_update', 'u_review_count_update', 'u_stars_update']]
+    features = users_train.loc[:, ['u_votes_useful_update', 'u_review_count_update', 'u_stars_update']]
 
     # scale the features
     feature_scaled = scale(np.array(features))
@@ -32,15 +33,15 @@ def userCluster(train, test):
     # create clusters based on user_id level
     model = KMeans(n_clusters=5)
     model.fit(feature_scaled)
-    unique_users['cluster_labels'] = model.labels_
+    users_train['cluster_labels'] = model.labels_
 
-    unique_users = unique_users.loc[:, ['user_id', 'cluster_labels']]
+    unique_users = users_train.loc[:, ['cluster_labels']]
 
     # add clusters into original data
-    train_update_df = pd.merge(train, unique_users, on='user_id', how='left')
+    train_update_df = pd.concat([train, unique_users])
 
     clusters_df = pd.get_dummies(train_update_df['cluster_labels'], prefix='cluster')
-    clusters_df.drop('cluster_0', axis=1, inplace=True)
+    clusters_df.drop('cluster_0.0', axis=1, inplace=True)
     train_update_df = pd.concat([train_update_df, clusters_df], axis=1)
     train_update_df.drop('cluster_labels', axis=1, inplace=True)
 
@@ -60,3 +61,12 @@ def userCluster(train, test):
     test_update_df.drop('cluster_labels', axis=1, inplace=True)
 
     return train_update_df, test_update_df
+
+
+if __name__ == "__main__":
+    training = pd.read_csv("../training_2.csv")
+    training = shuffle(training)
+    training = training[:int(.5*len(training))]
+    test = pd.read_csv("../testing_2.csv")
+    print np.shape(training), np.shape(test)
+    train_df, test_df = userCluster(training, test)
