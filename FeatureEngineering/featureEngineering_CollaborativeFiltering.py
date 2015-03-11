@@ -156,9 +156,8 @@ def addRecommendationScores(train_df, test_df):
     # Impute remaining missing values with mean
     train_df.replace([np.inf, -np.inf], np.nan, inplace=True)
     test_df.replace([np.inf, -np.inf], np.nan, inplace=True)
-    train_rec_mean = train_df['rec_scores'].mean()
-    train_df['rec_scores'].fillna(train_rec_mean, inplace=True)
-    test_df['rec_scores'].fillna(train_rec_mean, inplace=True)
+    train_df.fillna(train_df.mean()['rec_scores'], inplace=True)
+    test_df.fillna(train_df.mean()['rec_scores'], inplace=True)
 
 
     return train_df, test_df
