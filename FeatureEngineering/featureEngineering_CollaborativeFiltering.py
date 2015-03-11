@@ -1,7 +1,6 @@
 __author__ = 'griffin'
 
 import pandas as pd
-import numpy as np
 import random
 from scipy.spatial.distance import *
 import time
@@ -24,7 +23,7 @@ def distance(user1_dict, user2_dict):
 def createRatingsDictionary(ratings_df):
     """
     Create a dictionary of the form {user_id: {business_id: rating}} from a pandas
-    data frame containing (at least) the columns user_id, business_id, rating
+    data frame containing (at least) the columns user_id, business_id, rating (target)
     :param ratings_df: Pandas dataframe
     :return: dictionary of structure specified above
     """
@@ -36,10 +35,10 @@ def createRatingsDictionary(ratings_df):
     for idx, row in ratings_df.iterrows():
         # If the user is already in the dictionary, add the business and rating to their sub-dictionary
         if row['user_id'] in ratings_dict:
-            ratings_dict[row['user_id']][row['business_id']] = row['r_stars']
+            ratings_dict[row['user_id']][row['business_id']] = row['target']
         # Otherwise, create their sub-dictionary and add the business/rating
         else:
-            ratings_dict[row['user_id']] = {row['business_id']: row['r_stars']}
+            ratings_dict[row['user_id']] = {row['business_id']: row['target']}
 
     # Return dictionary
     return ratings_dict
