@@ -17,7 +17,7 @@ def userCluster(train, test):
     :param users: df of user_ids
     :return: numpy arrays without user_id
     """
-
+    print np.shape(train)
     # subset to only the user review information
     users_train = train.loc[:, ['user_id', 'u_votes_useful_update', 'u_review_count_update', 'u_stars_update']]
     # remove all duplicates and na values
@@ -38,13 +38,15 @@ def userCluster(train, test):
     unique_users = users_train.loc[:, ['cluster_labels']]
 
     # add clusters into original data
-    train_update_df = pd.concat([train, unique_users])
+    train_update_df = pd.concat([train, unique_users], axis=1)
 
     clusters_df = pd.get_dummies(train_update_df['cluster_labels'], prefix='cluster')
-    clusters_df.drop('cluster_0.0', axis=1, inplace=True)
+    clusters_df.drop('cluster_0', axis=1, inplace=True)
     train_update_df = pd.concat([train_update_df, clusters_df], axis=1)
     train_update_df.drop('cluster_labels', axis=1, inplace=True)
+    # print np.shape(train_update_df)
 
+    # print np.shape(test)
     # subset to only review information
     users_test = test.loc[:, ['u_votes_useful_update', 'u_review_count_update', 'u_stars_update']]
 
@@ -70,3 +72,4 @@ if __name__ == "__main__":
     test = pd.read_csv("../testing_2.csv")
     print np.shape(training), np.shape(test)
     train_df, test_df = userCluster(training, test)
+    print np.shape(train_df), np.shape(test_df)
