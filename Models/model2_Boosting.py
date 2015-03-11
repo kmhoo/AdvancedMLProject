@@ -103,14 +103,15 @@ if __name__ == "__main__":
 
     ### TEST MODEL WITH DIFFERENT FEATURES
 
+    # # test on one feature
     # feature = ['User Clustering']
     # feature_scores = round2(training, feature)
     # print "Scores:", feature_scores
     # print "Average Score:", np.mean(feature_scores)
 
     # Test on individual features
-    feature_eng = ['Category Reduction', 'User Clustering'] # , 'Text Features', 'Collaborative Filtering'
-    for i in range(1, 2): # 5
+    feature_eng = ['Category Reduction', 'User Clustering', 'Text Features', 'Collaborative Filtering']
+    for i in range(1, 5):
         combo = combinations(feature_eng, i)
         for com in combo:
             feature_list = list(com)

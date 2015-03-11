@@ -9,25 +9,28 @@ import nltk, string, csv, itertools, re
 import pandas as pd
 import numpy as np
 from collections import Counter, OrderedDict
+from data_cleaning import shuffle
 
-def get_reviews(fname):
+def get_reviews(fname, training):
     """
     get review text from the data set
     :param fname: file name of data set; expecting csv
     :return: pandas dataframe of text reviews (strings)
     """
-
+    train_users = training.loc[:, ['user_id', 'business_id', 'u_review_count_update']]
+    # df = pd.read_csv(fname, header=0, index_col=False)
     try:
         with open(fname, "rb") as infile:
             df = pd.DataFrame.from_csv(infile, header=0, index_col=False)
-            print "# of user reviews: ", len(df)
-            # retrieve only the columns we care about
-            new_df = df[['user_id', 'r_text']]
+            # print "# of user reviews: ", len(df)
+
+            # merge with training data to get only reviews we have
+            new_df = pd.merge(df, train_users, on=['user_id', 'business_id'])
             # drop any review entries that are blank
             new_df = new_df.dropna()
             # remove all newline characters from each entry
             new_df['r_text'] = new_df['r_text'].str.replace('\n', ' ')
-            print "... after dropping NAs: ", len(new_df)
+            # print "... after dropping NAs: ", len(new_df)
         return new_df
     except:
         raise IOError
@@ -43,13 +46,13 @@ def get_b_reviews(fname):
         with open(fname, "rb") as infile:
             df = pd.DataFrame.from_csv(infile, header=0, index_col=False)
             df = df[['business_id', 'r_text']]
-            print "# of businesses: ", len(df)
+            # print "# of businesses: ", len(df)
             # drop any review entries that are blank
             df = df.dropna()
 
             # remove all newline characters from each entry
             df['r_text'] = df['r_text'].str.replace('\n', ' ')
-            print "... after dropping NAs: ", len(df)
+            # print "... after dropping NAs: ", len(df)
         return df
     except:
         raise IOError
@@ -99,7 +102,7 @@ def create_corpus(reviews):
     userReviews = OrderedDict()
     userReviews2 = OrderedDict()
 
-    print "Starting corpus generation"
+    # print "Starting corpus generation"
     # get count of reviews by userid
     userReviewCounts = Counter(list(reviews['user_id']))
 
@@ -110,6 +113,28 @@ def create_corpus(reviews):
     # aggregate reviews by user ("document"); each user should now have a list of their reviews
     # output is a pd.Series sorted by user_id
     userReviewLists = reviews.groupby('user_id')['r_text'].apply(list)
+
+    # # attempt to remove current review
+    # # convert into pandas dataframe
+    # list_of_reviews = pd.DataFrame(userReviewLists).reset_index()
+    #
+    # # merge list of reviews back into dataframe
+    # reviews = pd.merge(reviews, list_of_reviews, on='user_id', how='left')
+    # reviews.rename(columns={'r_text_x': 'r_text', 'r_text_y': 'r_text_list'}, inplace=True)
+    #
+    # reviews['r_text_list_update'] = np.nan
+    #
+    # for idx, row in reviews.iterrows():
+    #     print idx
+    #     current_review = row['r_text']
+    #     print current_review
+    #     review_list = row['r_text_list']
+    #     print review_list
+    #     review_list.remove(current_review)
+    #     print review_list
+    #     reviews.loc[idx, 'r_text_list_update'] = review_list
+    #     print row['r_text_list_update']
+    # print 'UPDATE', len(reviews['r_text_list_update'][130])
 
     # recast user review lists as dictionary values
     for usr, rlist in userReviewLists.iteritems():
@@ -122,7 +147,7 @@ def create_corpus(reviews):
     # break between reviews (so that the last word of one review does not form a bigram with the first word of another)
     for usr, rlists in userReviews.iteritems():
         userReviews2[usr] = " hoobakerokamoto ".join(rlists)
-    print "User review lists combined"
+    # print "User review lists combined"
 
     # create a corpus of all reviews; each user's reviews is one document within the corpus
     for usr, rString in userReviews2.iteritems():
@@ -131,11 +156,12 @@ def create_corpus(reviews):
 
     # print userIDlist[:5]
 
-    print "user_id list, corpus, and user review counts generated"
+    # print "user_id list, corpus, and user review counts generated"
+    # print type(userIDlist), type(corpus), type(userReviewCounts)
     return userIDlist, corpus, userReviewCounts
 
 
-def ngram_processing(trainText, testText):
+def ngram_processing(train_df, test_df):
     """
     Function to create array of data for processing in an algorithm.
     :param trainText, testText: training and test data; must include fields 'user_id' and 'r_text'
@@ -143,87 +169,64 @@ def ngram_processing(trainText, testText):
     """
     dataSet = []
 
-    print "Starting text feature extraction "
+    # read in the text files
+    trainText = "../yelp_review_text.csv"
+
+    #subset for just reviews in training df (param)
+
+    # print "Starting text feature extraction "
 
     # process review data from training data
-    reviews = get_reviews(trainText)
+    reviews = get_reviews(trainText, train_df)
     userIDlist, corpus, userReviewCounts = create_corpus(reviews)
 
-    testReviews = get_reviews(testText)
-    testUserIDlist, testCorpus, testUserRevCounts = create_corpus(testReviews)
-
     # create frequency count vectorizer; set minimum document frequency to 1000
-    ngramVectorizer = CountVectorizer(ngram_range=(2,3), token_pattern=r'\b\w+\b', min_df=1000)
+    ngramVectorizer = CountVectorizer(ngram_range=(2, 3), token_pattern=r'\b\w+\b', min_df=500)
 
     # calculate frequencies for bigram/trigram features
-    print "Fitting/vectorizing ngram features (this may take awhile)"
+    # print "Fitting/vectorizing ngram features (this may take awhile)"
     textFeatures = ngramVectorizer.fit_transform(corpus).toarray()
 
     # get feature names and their indices via 'vocabulary_'; result is a dictionary
     feature_names = ngramVectorizer.get_feature_names()
-    print "# features trained:", len(feature_names)
+    # print "# features trained:", len(feature_names)
 
-    # get vectorized features from the test data set, using only the features created from the training data set
-    print "Vectorizing test reviews"
-    testNgramVectorizer = CountVectorizer(token_pattern=r'\b\w+\b', vocabulary=ngramVectorizer.vocabulary_)
-
-    testNgramFeatures = testNgramVectorizer.fit_transform(testCorpus).toarray()
-
-    # print testNgramFeatures
 
     # calculate tfidf scores for the ngram features; results in sparse matrix
     transformer = TfidfTransformer()
     tfidf = transformer.fit_transform(textFeatures).toarray()
-
-    # create tfidf transformer object, repeat for test data
-    transformer2 = TfidfTransformer()
-    tfidf_test = transformer2.fit_transform(testNgramFeatures).toarray()
-
-    print "# features in test", len(testNgramVectorizer.get_feature_names())
-
 
     # apply review frequency normalization for each user's Ngram tfidfs
     n = 0
     for user in userIDlist:
         # create new array of the tfidf normalized values for each row (user) in the tfidf array
         dataSet.append([userReviewCounts[user] * elem for elem in tfidf[n]])
-        # reviewWeights.append(userReviewCounts[user])
         n += 1
 
-    dataSet =  attach_text_features(np.array(dataSet))
+    # convert dataset to pandas dataframe
+    txt_tfidf = pd.DataFrame(dataSet, columns=feature_names)
+    txt_tfidf['user_id'] = userIDlist
 
-    print dataSet[:5]
+    #merging tfidif scores onto the training and test sets
+    train_update = pd.merge(train_df, txt_tfidf, on='user_id', how='left')
+    train_update.fillna(train_update.mean(), inplace=True)
 
-    # MERGE NEW FEATURES TO TRAINING DATA 2
-    train_x = attach_text_features(dataSet)
+    test_update = pd.merge(test_df, txt_tfidf, on='user_id', how='left')
+    test_update.fillna(test_update.mean(), inplace=True)
 
-    return dataSet
-
-
-def attach_text_features(tfidfArray):
-    """
-    Function to join new text features to the original training/test data files
-    :param tfidfArray: array of text features; rows are user_ids, columns are text features
-    :return: pandas dataframe of complete training data to this point
-    """
-
-    trainingData = "training_2.csv"
-    testData = "test_2.csv"
-
-    # train_x =
-
-    # return train_x
-    pass
+    return train_update, test_update
 
 
 if __name__=="__main__":
     trainText = "yelp_review_text.csv"
     testText = "yelp_review_text_test.csv"
 
-    trainingData = "training_2.csv"
-    testData = "test_2.csv"
+    trainingData = pd.read_csv("../training_2.csv")
+    trainingData = shuffle(trainingData)
+    trainingData = trainingData[:int(.5*len(trainingData))]
+    testData = pd.read_csv("../testing_2.csv")
 
-    ngram_processing(trainText, testText)
+    ngram_processing(trainingData, testData)
 
 
     ####################################
