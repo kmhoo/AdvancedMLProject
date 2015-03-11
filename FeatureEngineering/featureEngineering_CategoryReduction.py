@@ -49,6 +49,10 @@ def reduceCategories(train_df, test_df, category_col_names):
     train_df_new2 = pd.concat([train_df_new, components_train], axis=1)
     test_df_new2 = pd.concat([test_df_new, components_test], axis=1)
 
+    # Fill nas with the mean
+    train_df_new2.fillna(train_df_new2.mean(), inplace=True)
+    test_df_new2.fillna(test_df_new2.mean(), inplace=True)
+
     return train_df_new2, test_df_new2
 
 
