@@ -157,8 +157,8 @@ def addRecommendationScores(train_df, test_df):
     train_df.replace([np.inf, -np.inf], np.nan, inplace=True)
     test_df.replace([np.inf, -np.inf], np.nan, inplace=True)
     train_rec_mean = train_df['rec_scores'].mean()
-    train_df['rec_scores'].fillna(train_rec_mean)
-    test_df['rec_scores'].fillna(train_rec_mean)
+    train_df['rec_scores'].fillna(train_rec_mean, inplace=True)
+    test_df['rec_scores'].fillna(train_rec_mean, inplace=True)
 
 
     return train_df, test_df
