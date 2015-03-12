@@ -30,6 +30,12 @@ def dfToArray(train_df, test_df):
     X_train_array, y_train_array = numpyArrays(train_update)
     X_test_array, y_test_array = numpyArrays(test_update)
 
+    # Fill in nan's in numpy arrays
+    X_train_array = np.nan_to_num(X_train_array)
+    y_train_array = np.nan_to_num(y_train_array)
+    X_test_array = np.nan_to_num(X_test_array)
+    y_test_array = np.nan_to_num(y_test_array)2
+
     return X_train_array, y_train_array, X_test_array, y_test_array
 
 
@@ -78,6 +84,7 @@ def round2(X_df, featurelist):
         prediction = model.predict(Xtest_array)
         rmse = np.sqrt(mean_squared_error(ytest_array, prediction))
         scores.append(rmse)
+        print "Completed fold: " + str(rmse)
 
     return scores
 
@@ -86,7 +93,7 @@ if __name__ == "__main__":
     # Import the data
     training = pd.read_csv("../training_2.csv")
     training = shuffle(training)
-    training = training[:int(.5*len(training))]
+    training = training[:int(.2*len(training))]
     test = pd.read_csv("../testing_2.csv")
 
     print "Linear Model 5-Fold CV"
@@ -110,8 +117,9 @@ if __name__ == "__main__":
     # print "Average Score:", np.mean(feature_scores)
 
     # Test on individual features
-    feature_eng = ['Category Reduction', 'User Clustering', 'Text Features', 'Collaborative Filtering']
-    for i in range(1, 2): # 5
+    # feature_eng = ['Category Reduction', 'User Clustering', 'Text Features']
+    feature_eng = ['Text Features', 'User Clustering', 'Collaborative Filtering']
+    for i in range(3, 4): # 5
         combo = combinations(feature_eng, i)
         for com in combo:
             feature_list = list(com)
