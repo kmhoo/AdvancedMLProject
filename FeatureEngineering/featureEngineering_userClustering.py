@@ -17,7 +17,7 @@ def userCluster(train, test):
     :param users: df of user_ids
     :return: numpy arrays without user_id
     """
-    print np.shape(train)
+    # print np.shape(train)
     # subset to only the user review information
     users_train = train.loc[:, ['user_id', 'u_votes_useful_update', 'u_review_count_update', 'u_stars_update']]
     # remove all duplicates and na values
