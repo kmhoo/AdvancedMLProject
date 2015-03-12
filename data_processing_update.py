@@ -54,6 +54,8 @@ def numpyArrays(df):
     # set features to X and target to y numpy arrays
     X, y = np.array(df.ix[:, features]), np.array(df.ix[:, target])
 
+    # fill in nan's in numpy arrays
+    X, y = np.nan_to_num(X), np.nan_to_num(y)
     return X, y
 
 

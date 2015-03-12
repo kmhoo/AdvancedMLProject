@@ -30,12 +30,6 @@ def dfToArray(train_df, test_df):
     X_train_array, y_train_array = numpyArrays(train_update)
     X_test_array, y_test_array = numpyArrays(test_update)
 
-    # Fill in nan's in numpy arrays
-    X_train_array = np.nan_to_num(X_train_array)
-    y_train_array = np.nan_to_num(y_train_array)
-    X_test_array = np.nan_to_num(X_test_array)
-    y_test_array = np.nan_to_num(y_test_array)2
-
     return X_train_array, y_train_array, X_test_array, y_test_array
 
 

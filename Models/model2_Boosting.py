@@ -77,6 +77,8 @@ def round2(X_df, featurelist):
         prediction = model.predict(Xtest_array)
         rmse = np.sqrt(mean_squared_error(ytest_array, prediction))
         scores.append(rmse)
+        print rmse
+        print "Finish fold"
 
     return scores
 
