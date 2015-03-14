@@ -28,6 +28,7 @@ applyNewFeatures.py: script to implement each of the feature engineering techniq
 - featureEngineering_UserClustering: the R script will generate a Scree Plot to determine how many clusters we should use; the py script will implement KMeans on the data, and create dummy variables for every cluster
 - featureEngineering_textFeatures.py: creates new features of our bigrams and trigrams based on TF-IDF scores (limited the bigrams/trigrams to only those that appear in more than 1000 documents)
 - featureEngineering_CollaborativeFiltering: the R script; the py script
+missingUserUpdate.R: updates information about users with missing values to be used (instead of replacing them with the mean)
 
 # Models
 model_<MODEL>.py: runs each algorithm with 5 fold cross validation and any hyper-parameter tuning (using file from data_processing)
