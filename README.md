@@ -2,6 +2,7 @@
 This project contains all the files used to create the best model to predict user star ratings of a certain business.
 
 The Data:
+
 The 2013 RecSys Yelp Kaggle competition is where you will find the initial data. Only the training data was used during this project. There are four files you should find:
 - yelp_training_set_business.json
 - yelp_training_set_user.json
@@ -9,7 +10,8 @@ The 2013 RecSys Yelp Kaggle competition is where you will find the initial data.
 - yelp_train_set_checkin.json
 
 # First Step
-data_cleaning.py: aggregates all of the files, fixes any misspelled cities, creates dummy variables for the categories, and splits the data into a training and testing set. Lastly, the most important part of this script, is the removable of data leakage: excluding the test set information from the overall columns in the training set.
+data_cleaning.py: aggregates all of the files, fixes any misspelled cities, creates dummy variables for the categories, and splits the data into a training and testing set
+- the most important part of this script, is the removable of data leakage: excluding the test set information from the overall columns in the training set
 
 # Data Preprocessing
 data_processing.py and/or data_processing_update.py: each of these scripts will run our different models 
@@ -18,6 +20,7 @@ data_processing.py and/or data_processing_update.py: each of these scripts will 
 
 # Exploratory Data Analysis
 <feature>EDA.R: will look at specific variables in the data set as well as their correlations with other variables (including the target, review stars
+
 text_analysis: generates all tokens, unigrams, bigrams and trigrams of the reviews
 
 # Feature Engineering
@@ -29,7 +32,9 @@ applyNewFeatures.py: script to implement each of the feature engineering techniq
 
 # Models
 model_<MODEL>.py: runs each algorithm with 5 fold cross validation and any hyper-parameter tuning (using file from data_processing)
+
 model2_<MODEL>.py: runs the second iteration of the top algorithms with feature engineering included (using file from data_processing_update)
+
 finalModel_RandomForest.py: runs RandomForest with User Clusters and Category Principle Components; determines best hyper-parameters and uses best model to run again actual test data
 
 # Plots
