@@ -1,8 +1,7 @@
 # Yelp Recommendation Model
 This project contains all the files used to create the best model to predict user star ratings of a certain business.
 
-The Data:
-
+# The Data:
 The 2013 RecSys Yelp Kaggle competition is where you will find the initial data. Only the training data was used during this project. There are four files you should find:
 - yelp_training_set_business.json
 - yelp_training_set_user.json
