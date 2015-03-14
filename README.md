@@ -18,7 +18,7 @@ data_processing.py and/or data_processing_update.py: each of these scripts will 
 - data_processing_update: includes all from data_processing as well as more efficient ways of filling in missing data and more removable of data leakage; returns a new file for the models
 
 # Exploratory Data Analysis
-<feature>EDA.R: will look at specific variables in the data set as well as their correlations with other variables (including the target, review stars
+\<feature\>EDA.R: will look at specific variables in the data set as well as their correlations with other variables (including the target, review stars
 
 text_analysis: generates all tokens, unigrams, bigrams and trigrams of the reviews
 
@@ -31,9 +31,9 @@ applyNewFeatures.py: script to implement each of the feature engineering techniq
 missingUserUpdate.R: updates information about users with missing values to be used (instead of replacing them with the mean)
 
 # Models
-model_<MODEL>.py: runs each algorithm with 5 fold cross validation and any hyper-parameter tuning (using file from data_processing)
+model_\<MODEL\>.py: runs each algorithm with 5 fold cross validation and any hyper-parameter tuning (using file from data_processing)
 
-model2_<MODEL>.py: runs the second iteration of the top algorithms with feature engineering included (using file from data_processing_update)
+model2_\<MODEL\>.py: runs the second iteration of the top algorithms with feature engineering included (using file from data_processing_update)
 
 finalModel_RandomForest.py: runs RandomForest with User Clusters and Category Principle Components; determines best hyper-parameters and uses best model to run again actual test data
 
