@@ -156,6 +156,10 @@ def addRecommendationScores(train_df, test_df):
     # Impute remaining missing values with mean
     train_df.replace([np.inf, -np.inf], np.nan, inplace=True)
     test_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    print "Number missing in training set: {0}".format(train_df['rec_scores'].count())
+    print "Number missing in test set: {0}".format(test_df['rec_scores'].count())
+    print "Rows in training set: {0}".format(len(train_df['rec_scores']))
+    print "Rows in test set: {0}".format(len(test_df['rec_scores']))
     train_df.fillna(train_df.mean()['rec_scores'], inplace=True)
     test_df.fillna(train_df.mean()['rec_scores'], inplace=True)
 
