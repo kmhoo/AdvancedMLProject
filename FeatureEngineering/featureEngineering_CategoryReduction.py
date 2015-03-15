@@ -5,6 +5,7 @@ import pandas as pd
 import random
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
+from statsmodels.stats.outliers_influence import variance_inflation_factor
 
 
 def reduceCategories(train_df, test_df, category_col_names):
@@ -59,24 +60,35 @@ def reduceCategories(train_df, test_df, category_col_names):
 if __name__ == "__main__":
 
     # Import the data
-    training = pd.read_csv("../training_init.csv")
-    category_col = [col for col in training.columns if 'b_categories_' in col]
+    data = pd.read_csv("../training_init.csv")
+    category_col = [col for col in data.columns if 'b_categories_' in col]
 
     ## Test the reduceCategories function
-    n = len(training.index)
-    n_train = int(0.8*n)
+    n = len(data.index)
+    n_train = int(0.95*n)
     train_indices = random.sample(xrange(n), n_train)
     test_indices = list(set(xrange(n)) - set(train_indices))
-    train_df = training.loc[train_indices, :]
-    test_df = training.loc[test_indices, :]
+    train_df = data.loc[train_indices, :]
+    test_df = data.loc[test_indices, :]
 
     train_df_new, test_df_new = reduceCategories(train_df, test_df, category_col)
 
-    ## Create a scree plot
-
     # Extract business category columns
-    categories = training[category_col]
+    categories = data[category_col]
     categories = np.asarray(categories)
+
+    # ## Analyze variance inflation factor (VIF) for every variable
+    # VIFs = [variance_inflation_factor(categories, i) for i in np.arange(categories.shape[0])]
+    #
+    # # Plot histogram of VIFs
+    # plt.hist(VIFs, color=(150, 0, 205))
+    # plt.title("Histogram of Variance Inflation Factors Among Category Features")
+    # plt.xlabel("VIF")
+    # plt.ylabel("Frequency")
+    # plt.savefig("vif_hist.png")
+    # plt.close()
+
+    ## Create a scree plot
 
     # Fit the PCA on full training
     pca = PCA()
@@ -88,11 +100,14 @@ if __name__ == "__main__":
     n_components = next(idx for idx, value in enumerate(explained_var_cumsum) if value > 0.9)
 
     # Scree plot
+    plt.figure(figsize=(4.5, 4.5))
     plt.plot(range(len(explained_var_cumsum)), explained_var_cumsum)
     plt.hlines(y=0.9, xmin=0, xmax=n_components, colors='red', linestyles='dashed')
     plt.vlines(x=n_components, ymin=0, ymax=0.9, colors='red', linestyles='dashed')
     plt.ylim(0, 1)
-    plt.title('Scree Plot')
+    plt.xlim(0, 508)
+    plt.subplots_adjust(top=0.85)
+    plt.title('Proportion of Variance Explained\nby Principal Components')
     plt.xlabel('Number of Principal Components')
     plt.ylabel('Proportion of Variance Explained')
     plt.savefig("pca_scree.png")
